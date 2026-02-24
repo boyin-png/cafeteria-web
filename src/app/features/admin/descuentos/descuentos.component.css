@@ -1,0 +1,477 @@
+/* ══════════════════════════════════════
+   DESCUENTOS COMPONENT
+   ══════════════════════════════════════ */
+
+.descuentos-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+/* ── Alert / Loading ── */
+.alert-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #dc3545;
+    font-size: 0.875rem;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.loading-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 30vh;
+    gap: 1rem;
+    color: #9ca3af;
+}
+
+.spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #1B4F8A;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ══════════════════════════════════════
+   TABLE
+   ══════════════════════════════════════ */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 0.625rem 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
+}
+
+.data-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+    color: #1a1a2e;
+}
+
+.data-table tr:hover td {
+    background: #f9fafb;
+}
+
+.data-table tr.inactivo td {
+    opacity: 0.45;
+}
+
+.nombre-cell {
+    font-weight: 600;
+}
+
+.valor-cell {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: #059669;
+}
+
+.usos-cell {
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.fecha-cell {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.empty-cell {
+    text-align: center;
+    color: #9ca3af;
+    padding: 2rem !important;
+}
+
+/* ── Badges ── */
+.badge-tipo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    font-weight: 800;
+    font-size: 0.8125rem;
+    color: #fff;
+}
+
+.tipo-porcentaje {
+    background: #7C3AED;
+}
+
+.tipo-monto_fijo {
+    background: #059669;
+}
+
+.badge-cupon {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.175rem 0.5rem;
+    border-radius: 4px;
+    background: #dbeafe;
+    color: #1B4F8A;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.badge-auto {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    padding: 0.175rem 0.5rem;
+    border-radius: 4px;
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.acciones-cell {
+    display: flex;
+    gap: 0.25rem;
+}
+
+/* ── Toggle ── */
+.toggle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.toggle-track {
+    display: block;
+    width: 36px;
+    height: 20px;
+    border-radius: 20px;
+    background: #d1d5db;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.toggle-btn.on .toggle-track {
+    background: #059669;
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+}
+
+.toggle-btn.on .toggle-thumb {
+    transform: translateX(16px);
+}
+
+/* ══════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 200;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 92%;
+    max-width: 520px;
+    max-height: 90vh;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    z-index: 201;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.125rem;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.625rem;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ── Section label ── */
+.section-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #9ca3af;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f3f4f6;
+}
+
+.section-label:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+/* ── Radio cards ── */
+.tipo-selector {
+    display: flex;
+    gap: 0.625rem;
+}
+
+.radio-card {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.875rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.radio-card.selected {
+    border-color: #7C3AED;
+    background: #f5f3ff;
+    color: #7C3AED;
+}
+
+.radio-card input {
+    display: none;
+}
+
+.radio-icon {
+    font-size: 1.125rem;
+    font-weight: 800;
+}
+
+/* ── Days chips ── */
+.dias-row {
+    display: flex;
+    gap: 0.375rem;
+    flex-wrap: wrap;
+}
+
+.dia-chip {
+    padding: 0.35rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1.5px solid #d1d5db;
+    background: #fff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.dia-chip.activo {
+    background: #1B4F8A;
+    color: #fff;
+    border-color: #1B4F8A;
+}
+
+/* ── Form fields ── */
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-field label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.hint {
+    font-weight: 400;
+    color: #9ca3af;
+}
+
+.form-field input,
+.form-field select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.875rem;
+    border: 1.5px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+    background: #fafafa;
+    color: #1a1a2e;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+    border-color: #1B4F8A;
+    background: #fff;
+}
+
+.form-row {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.form-row .form-field {
+    flex: 1;
+}
+
+/* ── Errors ── */
+.errors-list {
+    background: #fef2f2;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+}
+
+.errors-list p {
+    margin: 0.2rem 0;
+    font-size: 0.8125rem;
+    color: #dc3545;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+    padding: 0.5rem 1.125rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #fff;
+    background: #1B4F8A;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-primary:hover {
+    background: #163f6e;
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    padding: 0.5rem 1.125rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #374151;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-secondary:hover {
+    background: #e5e7eb;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9375rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.btn-icon:hover {
+    background: #f3f4f6;
+}
+
+.btn-icon-danger:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}

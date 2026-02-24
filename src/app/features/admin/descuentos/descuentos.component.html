@@ -1,0 +1,182 @@
+<div class="descuentos-container">
+    <div class="page-header">
+        <h2 class="page-title">🏷️ Descuentos y Cupones</h2>
+        <button class="btn-primary" (click)="abrirCrear()">+ Nuevo Descuento</button>
+    </div>
+
+    <!-- Error -->
+    <div class="alert-error" *ngIf="errorGeneral">
+        {{ errorGeneral }}
+        <button class="alert-close" (click)="errorGeneral = ''">✕</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-screen" *ngIf="cargando">
+        <div class="spinner"></div>
+        <p>Cargando descuentos...</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="!cargando">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Valor</th>
+                    <th>Cupón</th>
+                    <th>Usos</th>
+                    <th>Válido hasta</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let d of descuentos" [class.inactivo]="!d.activo">
+                    <td class="nombre-cell">{{ d.nombre }}</td>
+                    <td>
+                        <span class="badge-tipo" [ngClass]="'tipo-' + d.tipo">
+                            {{ d.tipo === 'porcentaje' ? '%' : '$' }}
+                        </span>
+                    </td>
+                    <td class="valor-cell">{{ formatValor(d) }}</td>
+                    <td>
+                        <span *ngIf="d.codigo_cupon" class="badge-cupon">{{ d.codigo_cupon }}</span>
+                        <span *ngIf="!d.codigo_cupon" class="badge-auto">Automático</span>
+                    </td>
+                    <td class="usos-cell">
+                        {{ d.usos_actuales }}<span *ngIf="d.usos_maximos !== null"> / {{ d.usos_maximos }}</span>
+                    </td>
+                    <td class="fecha-cell">{{ formatFecha(d.fecha_fin) }}</td>
+                    <td>
+                        <button class="toggle-btn" [class.on]="d.activo" [class.off]="!d.activo"
+                            (click)="toggleActivo(d)">
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </button>
+                    </td>
+                    <td>
+                        <div class="acciones-cell">
+                            <button class="btn-icon" (click)="abrirEditar(d)" title="Editar">✏️</button>
+                            <button class="btn-icon btn-icon-danger" (click)="eliminar(d)" title="Eliminar"
+                                [disabled]="d.usos_actuales > 0">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="descuentos.length === 0">
+                    <td colspan="8" class="empty-cell">No hay descuentos configurados.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL CREAR / EDITAR
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()"></div>
+<div class="modal" *ngIf="modalAbierto">
+    <div class="modal-header">
+        <h3>{{ editando ? 'Editar Descuento' : 'Nuevo Descuento' }}</h3>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+        <!-- Sección 1: Datos básicos -->
+        <div class="section-label">Datos básicos</div>
+
+        <div class="form-field">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="form.nombre" placeholder="Ej: Happy Hour 2x1" />
+        </div>
+
+        <div class="tipo-selector">
+            <label class="radio-card" [class.selected]="form.tipo === 'porcentaje'">
+                <input type="radio" name="tipo" value="porcentaje" [(ngModel)]="form.tipo" />
+                <span class="radio-icon">%</span> Porcentaje
+            </label>
+            <label class="radio-card" [class.selected]="form.tipo === 'monto_fijo'">
+                <input type="radio" name="tipo" value="monto_fijo" [(ngModel)]="form.tipo" />
+                <span class="radio-icon">$</span> Monto fijo
+            </label>
+        </div>
+
+        <div class="form-field">
+            <label>Valor * <span class="hint">{{ form.tipo === 'porcentaje' ? '(1–100)' : '(pesos)' }}</span></label>
+            <input type="number" [(ngModel)]="form.valor" min="0" [max]="form.tipo === 'porcentaje' ? 100 : 99999"
+                step="0.01" />
+        </div>
+
+        <div class="form-field">
+            <label>Código de cupón <span class="hint">(dejar vacío = automático)</span></label>
+            <input type="text" [(ngModel)]="form.codigo_cupon" placeholder="VERANO2026"
+                style="text-transform: uppercase;" />
+        </div>
+
+        <!-- Sección 2: Vigencia -->
+        <div class="section-label">Vigencia</div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Fecha inicio *</label>
+                <input type="date" [(ngModel)]="form.fecha_inicio" />
+            </div>
+            <div class="form-field">
+                <label>Fecha fin *</label>
+                <input type="date" [(ngModel)]="form.fecha_fin" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Usos máximos <span class="hint">(vacío = ilimitados)</span></label>
+            <input type="number" [(ngModel)]="form.usos_maximos" min="1" placeholder="Sin límite" />
+        </div>
+
+        <!-- Sección 3: Condiciones -->
+        <div class="section-label">Condiciones de aplicación</div>
+
+        <div class="form-field">
+            <label>Días de la semana</label>
+            <div class="dias-row">
+                <button *ngFor="let dia of dias; let i = index" class="dia-chip" [class.activo]="diaSeleccionado(i)"
+                    (click)="toggleDia(i)">
+                    {{ dia }}
+                </button>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label>Hora inicio</label>
+                <input type="time" [(ngModel)]="form.condiciones.hora_inicio" />
+            </div>
+            <div class="form-field">
+                <label>Hora fin</label>
+                <input type="time" [(ngModel)]="form.condiciones.hora_fin" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Categoría</label>
+            <select [(ngModel)]="form.condiciones.categoria_id">
+                <option value="">Todas las categorías</option>
+                <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label>Monto mínimo del pedido ($)</label>
+            <input type="number" [(ngModel)]="form.condiciones.monto_minimo_pedido" min="0" step="0.01"
+                placeholder="0.00" />
+        </div>
+
+        <!-- Errores -->
+        <div class="errors-list" *ngIf="errores.length">
+            <p *ngFor="let e of errores">{{ e }}</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmar()" [disabled]="isLoading">
+            {{ isLoading ? 'Guardando...' : (editando ? 'Guardar Cambios' : 'Crear Descuento') }}
+        </button>
+    </div>
+</div>

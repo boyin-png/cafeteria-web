@@ -1,0 +1,160 @@
+<div class="inventario-container">
+    <h2 class="page-title">📦 Inventario</h2>
+
+    <!-- Error general -->
+    <div class="alert-error" *ngIf="errorGeneral">
+        {{ errorGeneral }}
+        <button class="alert-close" (click)="errorGeneral = ''">✕</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-screen" *ngIf="cargando">
+        <div class="spinner"></div>
+        <p>Cargando inventario...</p>
+    </div>
+
+    <div *ngIf="!cargando">
+        <!-- ════════════════════════════════════
+         ALERTAS DE STOCK BAJO
+         ════════════════════════════════════ -->
+        <section class="alertas-section" *ngIf="alertasActivas.length > 0">
+            <div class="section-header alertas-header">
+                <h3>⚠️ Alertas de Stock Bajo</h3>
+                <span class="badge-count">{{ alertasActivas.length }}</span>
+            </div>
+
+            <div class="alertas-grid">
+                <div class="alerta-card" *ngFor="let inv of alertasActivas">
+                    <div class="alerta-top">
+                        <div>
+                            <span class="producto-nombre">{{ inv.nombre_producto }}</span>
+                            <span class="producto-estado" [class.no-disponible]="!inv.disponible">
+                                {{ inv.disponible ? 'Disponible' : 'No disponible' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <ul class="insumos-alerta">
+                        <li *ngFor="let ins of inv.insumos; let i = index"
+                            [class.bajo]="ins.stock_actual < ins.stock_minimo">
+                            <div class="insumo-info">
+                                <span class="insumo-nombre">{{ ins.nombre }}</span>
+                                <span class="insumo-stock">
+                                    {{ ins.stock_actual }} / {{ ins.stock_minimo }} {{ ins.unidad }}
+                                </span>
+                            </div>
+                            <button class="btn-sm" (click)="editarInsumo(inv, i)">✏️ Editar</button>
+                        </li>
+                    </ul>
+
+                    <div class="alerta-actions">
+                        <button class="btn-reactivar" *ngIf="todosInsumosOk(inv) && !inv.disponible"
+                            (click)="reactivarProducto(inv)" [disabled]="isLoading">
+                            ✅ Reactivar Producto
+                        </button>
+                        <span class="reactivar-hint" *ngIf="!todosInsumosOk(inv)">
+                            Reponer insumos bajos para poder reactivar
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sin alertas -->
+        <div class="no-alertas" *ngIf="alertasActivas.length === 0">
+            <span>✅</span> Todos los productos tienen stock suficiente.
+        </div>
+
+        <!-- ════════════════════════════════════
+         INVENTARIO COMPLETO
+         ════════════════════════════════════ -->
+        <section class="inventario-section">
+            <h3 class="section-title">Inventario Completo</h3>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Insumos</th>
+                            <th>Última actualización</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let inv of inventario">
+                            <td>
+                                <span class="producto-nombre">{{ inv.nombre_producto }}</span>
+                                <span class="badge-alerta" *ngIf="inv.alerta_activa">⚠️</span>
+                            </td>
+                            <td>
+                                <div class="insumos-inline">
+                                    <span *ngFor="let ins of inv.insumos; let last = last" class="insumo-tag"
+                                        [class.bajo]="ins.stock_actual < ins.stock_minimo">
+                                        {{ ins.nombre }}: {{ ins.stock_actual }}{{ ins.unidad }}{{ last ? '' : ', ' }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="fecha-col">{{ formatFecha(inv.ultima_actualizacion) }}</td>
+                            <td>
+                                <div class="acciones-cell">
+                                    <button class="btn-icon" *ngFor="let ins of inv.insumos; let i = index"
+                                        (click)="editarInsumo(inv, i)" [title]="'Editar ' + ins.nombre">
+                                        ✏️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr *ngIf="inventario.length === 0">
+                            <td colspan="4" class="empty-cell">No hay registros de inventario.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL EDITAR INSUMO
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()"></div>
+<div class="modal" *ngIf="modalAbierto && invEditando">
+    <div class="modal-header">
+        <h3>Editar Insumo</h3>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="modal-context">
+            <span class="context-label">Producto:</span>
+            <span class="context-value">{{ invEditando.nombre_producto }}</span>
+        </div>
+
+        <div class="insumo-edit-card">
+            <div class="insumo-nombre-large">{{ formInsumo.nombre }}</div>
+            <span class="insumo-unidad">Unidad: {{ formInsumo.unidad }}</span>
+
+            <div class="form-row">
+                <div class="form-field">
+                    <label>Stock actual</label>
+                    <input type="number" [(ngModel)]="formInsumo.stock_actual" min="0" step="1" />
+                </div>
+                <div class="form-field">
+                    <label>Stock mínimo</label>
+                    <input type="number" [(ngModel)]="formInsumo.stock_minimo" min="0" step="1" />
+                </div>
+            </div>
+
+            <div class="stock-indicator" [class.ok]="stockSuficiente" [class.bajo]="!stockSuficiente">
+                <span *ngIf="stockSuficiente">✅ Stock suficiente</span>
+                <span *ngIf="!stockSuficiente">⚠️ Stock bajo el mínimo</span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarStock()" [disabled]="isLoading">
+            {{ isLoading ? 'Guardando...' : 'Guardar' }}
+        </button>
+    </div>
+</div>

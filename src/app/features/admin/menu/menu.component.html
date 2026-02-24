@@ -1,0 +1,293 @@
+<div class="menu-container">
+    <h2 class="page-title">Gestión de Menú</h2>
+
+    <!-- Error general -->
+    <div class="alert-error" *ngIf="errorGeneral">
+        {{ errorGeneral }}
+        <button class="alert-close" (click)="errorGeneral = ''">✕</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab" [class.active]="tabActivo === 'categorias'" (click)="cambiarTab('categorias')">📂
+            Categorías</button>
+        <button class="tab" [class.active]="tabActivo === 'productos'" (click)="cambiarTab('productos')">🍽️
+            Productos</button>
+        <button class="tab" [class.active]="tabActivo === 'modificadores'" (click)="cambiarTab('modificadores')">
+            🔧 Modificadores
+            <span class="tab-badge" *ngIf="productoSeleccionado">{{ productoSeleccionado.nombre }}</span>
+        </button>
+    </div>
+
+    <!-- ════════════════════════════════════
+       TAB CATEGORÍAS
+       ════════════════════════════════════ -->
+    <div class="tab-content" *ngIf="tabActivo === 'categorias'">
+        <div class="toolbar">
+            <button class="btn-primary" (click)="abrirCrearCategoria()">+ Nueva Categoría</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Orden</th>
+                        <th>Nombre</th>
+                        <th>Ícono URL</th>
+                        <th>Activa</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cat of categorias">
+                        <td class="center">{{ cat.orden_visual }}</td>
+                        <td>{{ cat.nombre }}</td>
+                        <td class="truncate">{{ cat.icono_url }}</td>
+                        <td class="center">
+                            <label class="toggle">
+                                <input type="checkbox" [checked]="cat.activa" (change)="onToggleActiva(cat)" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </td>
+                        <td class="acciones">
+                            <button class="btn-icon" title="Editar" (click)="abrirEditarCategoria(cat)">✏️</button>
+                            <button class="btn-icon danger" title="Eliminar"
+                                (click)="eliminarCategoria(cat.id)">🗑️</button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="categorias.length === 0">
+                        <td colspan="5" class="empty">No hay categorías registradas</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+       TAB PRODUCTOS
+       ════════════════════════════════════ -->
+    <div class="tab-content" *ngIf="tabActivo === 'productos'">
+        <div class="toolbar">
+            <select class="filter-select" [(ngModel)]="filtroCategoria" (change)="filtrarPorCategoria()">
+                <option value="">Todas las categorías</option>
+                <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+            </select>
+            <button class="btn-primary" (click)="abrirCrearProducto()">+ Nuevo Producto</button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Precio</th>
+                        <th>Disponible</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let prod of productos">
+                        <td>{{ prod.nombre }}</td>
+                        <td>{{ nombreCategoria(prod.categoria_id) }}</td>
+                        <td class="precio">\${{ prod.precio.toFixed(2) }}</td>
+                        <td class="center">
+                            <label class="toggle">
+                                <input type="checkbox" [checked]="prod.disponible"
+                                    (change)="onToggleDisponible(prod)" />
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </td>
+                        <td class="acciones">
+                            <button class="btn-icon" title="Editar" (click)="abrirEditarProducto(prod)">✏️</button>
+                            <button class="btn-icon" title="Modificadores"
+                                (click)="seleccionarProducto(prod)">🔧</button>
+                        </td>
+                    </tr>
+                    <tr *ngIf="productos.length === 0">
+                        <td colspan="5" class="empty">No hay productos registrados</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════
+       TAB MODIFICADORES
+       ════════════════════════════════════ -->
+    <div class="tab-content" *ngIf="tabActivo === 'modificadores'">
+        <div *ngIf="!productoSeleccionado" class="empty-panel">
+            <p>Selecciona un producto desde la pestaña <strong>Productos</strong> para ver sus modificadores.</p>
+        </div>
+
+        <div *ngIf="productoSeleccionado">
+            <div class="toolbar">
+                <span class="toolbar-label">Modificadores de: <strong>{{ productoSeleccionado.nombre }}</strong></span>
+                <button class="btn-primary" (click)="abrirCrearModificador()">+ Nuevo Grupo</button>
+            </div>
+
+            <div class="mod-grid">
+                <div class="mod-card" *ngFor="let mod of modificadores">
+                    <div class="mod-header">
+                        <div>
+                            <h4 class="mod-name">{{ mod.nombre }}</h4>
+                            <div class="mod-badges">
+                                <span class="badge" [class.badge-required]="mod.obligatorio">{{ mod.obligatorio ?
+                                    'Obligatorio' : 'Opcional' }}</span>
+                                <span class="badge">{{ mod.seleccion_multiple ? 'Múltiple' : 'Única' }}</span>
+                            </div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" [checked]="mod.activo" (change)="onToggleModActivo(mod)" />
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <ul class="opciones-list">
+                        <li *ngFor="let opt of mod.opciones">
+                            <span>{{ opt.nombre }}</span>
+                            <span class="opt-precio" *ngIf="opt.precio_adicional > 0">+\${{
+                                opt.precio_adicional.toFixed(2) }}</span>
+                        </li>
+                        <li *ngIf="mod.opciones.length === 0" class="empty-opt">Sin opciones</li>
+                    </ul>
+
+                    <div class="mod-actions">
+                        <button class="btn-sm" (click)="abrirEditarModificador(mod)">✏️ Editar</button>
+                        <button class="btn-sm danger" (click)="onEliminarModificador(mod.id)">🗑️ Eliminar</button>
+                    </div>
+                </div>
+
+                <div *ngIf="modificadores.length === 0" class="empty-panel">
+                    <p>Este producto no tiene modificadores.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODALES
+     ════════════════════════════════════ -->
+
+<!-- Overlay -->
+<div class="modal-overlay" *ngIf="modalAbierto" (click)="cerrarModal()"></div>
+
+<!-- Modal Categoría -->
+<div class="modal" *ngIf="modalAbierto === 'categoria'">
+    <div class="modal-header">
+        <h3>{{ modoEdicion ? 'Editar' : 'Nueva' }} Categoría</h3>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-field">
+            <label>Nombre</label>
+            <input type="text" [(ngModel)]="formCategoria.nombre" placeholder="Ej: Bebidas calientes" />
+        </div>
+        <div class="form-field">
+            <label>Orden visual</label>
+            <input type="number" [(ngModel)]="formCategoria.orden_visual" min="1" />
+        </div>
+        <div class="form-field">
+            <label>Ícono URL</label>
+            <input type="text" [(ngModel)]="formCategoria.icono_url" placeholder="https://..." />
+        </div>
+        <div class="form-field checkbox-field">
+            <label><input type="checkbox" [(ngModel)]="formCategoria.activa" /> Activa</label>
+        </div>
+        <div class="modal-error" *ngIf="errorModal">{{ errorModal }}</div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarCategoria()">{{ modoEdicion ? 'Actualizar' : 'Crear' }}</button>
+    </div>
+</div>
+
+<!-- Modal Producto -->
+<div class="modal" *ngIf="modalAbierto === 'producto'">
+    <div class="modal-header">
+        <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Producto</h3>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-field">
+            <label>Nombre</label>
+            <input type="text" [(ngModel)]="formProducto.nombre" placeholder="Ej: Cappuccino" />
+        </div>
+        <div class="form-field">
+            <label>Descripción</label>
+            <textarea [(ngModel)]="formProducto.descripcion" rows="3"
+                placeholder="Descripción del producto..."></textarea>
+        </div>
+        <div class="form-row">
+            <div class="form-field">
+                <label>Precio</label>
+                <input type="number" [(ngModel)]="formProducto.precio" min="0" step="0.01" />
+            </div>
+            <div class="form-field">
+                <label>Categoría</label>
+                <select [(ngModel)]="formProducto.categoria_id">
+                    <option value="">Seleccionar...</option>
+                    <option *ngFor="let cat of categorias" [value]="cat.id">{{ cat.nombre }}</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Imagen URL</label>
+            <input type="text" [(ngModel)]="formProducto.imagen_url" placeholder="https://..." />
+        </div>
+        <div class="form-field checkbox-field">
+            <label><input type="checkbox" [(ngModel)]="formProducto.disponible" /> Disponible</label>
+        </div>
+        <div class="modal-error" *ngIf="errorModal">{{ errorModal }}</div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarProducto()">{{ modoEdicion ? 'Actualizar' : 'Crear' }}</button>
+    </div>
+</div>
+
+<!-- Modal Modificador -->
+<div class="modal modal-wide" *ngIf="modalAbierto === 'modificador'">
+    <div class="modal-header">
+        <h3>{{ modoEdicion ? 'Editar' : 'Nuevo' }} Grupo de Modificadores</h3>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-field">
+            <label>Nombre del grupo</label>
+            <input type="text" [(ngModel)]="formModificador.nombre" placeholder="Ej: Tamaño, Extras, Leche" />
+        </div>
+        <div class="form-row">
+            <div class="form-field checkbox-field">
+                <label><input type="checkbox" [(ngModel)]="formModificador.obligatorio" /> Obligatorio</label>
+            </div>
+            <div class="form-field checkbox-field">
+                <label><input type="checkbox" [(ngModel)]="formModificador.seleccion_multiple" /> Selección
+                    múltiple</label>
+            </div>
+        </div>
+
+        <div class="opciones-section">
+            <div class="opciones-header">
+                <label>Opciones</label>
+                <button class="btn-sm" (click)="agregarOpcion()">+ Agregar opción</button>
+            </div>
+            <div class="opcion-row" *ngFor="let opt of formModificador.opciones; let i = index">
+                <input type="text" [(ngModel)]="opt.nombre" placeholder="Nombre de la opción" class="opcion-nombre" />
+                <input type="number" [(ngModel)]="opt.precio_adicional" min="0" step="0.01" placeholder="Precio extra"
+                    class="opcion-precio" />
+                <button class="btn-icon danger" (click)="eliminarOpcion(i)" title="Quitar">✕</button>
+            </div>
+            <div *ngIf="formModificador.opciones.length === 0" class="empty-opt-msg">
+                Agrega al menos una opción al grupo.
+            </div>
+        </div>
+
+        <div class="modal-error" *ngIf="errorModal">{{ errorModal }}</div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" (click)="guardarModificador()">{{ modoEdicion ? 'Actualizar' : 'Crear' }}</button>
+    </div>
+</div>

@@ -1,0 +1,236 @@
+<!-- Loading inicial -->
+<div class="loading-screen" *ngIf="cargandoTurno">
+    <div class="spinner"></div>
+    <p>Verificando turno de caja...</p>
+</div>
+
+<!-- ════════════════════════════════════
+     PANTALLA A — SIN TURNO
+     ════════════════════════════════════ -->
+<div class="abrir-turno-screen" *ngIf="!cargandoTurno && !turnoActivo">
+    <div class="turno-card">
+        <div class="turno-icon">💰</div>
+        <h2>Abrir Turno de Caja</h2>
+        <p class="turno-desc">Ingresa el fondo inicial para comenzar tu jornada.</p>
+
+        <div class="form-field">
+            <label for="fondoInicial">Fondo inicial de caja ($)</label>
+            <input id="fondoInicial" type="number" [(ngModel)]="fondoInicial" min="0" step="0.01" placeholder="0.00" />
+        </div>
+
+        <div class="error-msg" *ngIf="errorTurno">{{ errorTurno }}</div>
+
+        <button class="btn-primary full" (click)="abrirTurno()" [disabled]="abriendoTurno || fondoInicial < 0">
+            <span *ngIf="!abriendoTurno">Abrir Turno</span>
+            <span *ngIf="abriendoTurno" class="spinner-inline"></span>
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     PANTALLA B — TURNO ACTIVO
+     ════════════════════════════════════ -->
+<div class="caja-activa" *ngIf="!cargandoTurno && turnoActivo">
+    <!-- Header del turno -->
+    <div class="caja-header">
+        <div class="header-info">
+            <h2>Caja Abierta</h2>
+            <div class="header-meta">
+                <span>🕐 Apertura: {{ formatHora(turnoActivo.fecha_apertura) }}</span>
+                <span>💵 Fondo: ${{ turnoActivo.fondo_inicial.toFixed(2) }}</span>
+            </div>
+        </div>
+        <button class="btn-cerrar-turno" (click)="abrirModalCierre()">Cerrar Turno</button>
+    </div>
+
+    <!-- Lista de pedidos para cobrar -->
+    <h3 class="section-title">Pedidos Pendientes de Cobro</h3>
+
+    <div *ngIf="pedidosParaCobrar$ | async as pedidos; else cargandoPedidos">
+        <div *ngIf="pedidos.length === 0" class="empty-state">
+            <span class="empty-icon">☕</span>
+            <p>No hay pedidos pendientes de cobro</p>
+            <span class="empty-sub">Los pedidos entregados aparecerán aquí automáticamente</span>
+        </div>
+
+        <div class="pedidos-lista">
+            <div *ngFor="let pedido of pedidos" class="pedido-card">
+                <div class="pedido-info">
+                    <div class="pedido-mesa">Mesa {{ pedido.mesa_id }}</div>
+                    <div class="pedido-items-resumen">
+                        <span *ngFor="let item of pedido.items; let last = last">
+                            {{ item.cantidad }}× {{ item.nombre }}{{ last ? '' : ', ' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="pedido-cobro">
+                    <span class="pedido-total">${{ pedido.total.toFixed(2) }}</span>
+                    <button class="btn-cobrar" (click)="abrirModalCobro(pedido)">Cobrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #cargandoPedidos>
+        <div class="loading-inline">
+            <div class="spinner"></div>
+        </div>
+    </ng-template>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL COBRO
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalCobro" (click)="cerrarModalCobro()"></div>
+<div class="modal" *ngIf="modalCobro && pedidoSeleccionado">
+    <div class="modal-header">
+        <h3>Cobrar — Mesa {{ pedidoSeleccionado.mesa_id }}</h3>
+        <button class="modal-close" (click)="cerrarModalCobro()">✕</button>
+    </div>
+    <div class="modal-body">
+        <!-- Resumen del pedido -->
+        <div class="cobro-items">
+            <div *ngFor="let item of pedidoSeleccionado.items" class="cobro-item-row">
+                <span class="cobro-qty">{{ item.cantidad }}×</span>
+                <span class="cobro-name">{{ item.nombre }}</span>
+                <span class="cobro-price">${{ (item.precio_snapshot * item.cantidad).toFixed(2) }}</span>
+            </div>
+        </div>
+
+        <div class="cobro-totals">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span>${{ pedidoSeleccionado.subtotal.toFixed(2) }}</span>
+            </div>
+            <div class="total-row" *ngIf="pedidoSeleccionado.descuento_aplicado">
+                <span>Descuento</span>
+                <span class="descuento">-${{ pedidoSeleccionado.descuento_aplicado.monto_descontado.toFixed(2) }}</span>
+            </div>
+            <div class="total-row total-final">
+                <span>Total</span>
+                <span>${{ pedidoSeleccionado.total.toFixed(2) }}</span>
+            </div>
+        </div>
+
+        <!-- Método de pago -->
+        <div class="metodo-pago">
+            <label class="radio-card" [class.selected]="metodoPago === 'efectivo'">
+                <input type="radio" name="metodoPago" value="efectivo" [(ngModel)]="metodoPago" />
+                <span class="radio-icon">💵</span> Efectivo
+            </label>
+            <label class="radio-card" [class.selected]="metodoPago === 'tarjeta'">
+                <input type="radio" name="metodoPago" value="tarjeta" [(ngModel)]="metodoPago" />
+                <span class="radio-icon">💳</span> Tarjeta
+            </label>
+        </div>
+
+        <!-- Efectivo: monto recibido y cambio -->
+        <div *ngIf="metodoPago === 'efectivo'" class="efectivo-section">
+            <div class="form-field">
+                <label>Monto recibido</label>
+                <input type="number" [(ngModel)]="montoRecibido" min="0" step="0.01" />
+            </div>
+            <div class="cambio-display" [class.insuficiente]="montoInsuficiente">
+                <span class="cambio-label">{{ montoInsuficiente ? 'Monto insuficiente' : 'Cambio' }}</span>
+                <span class="cambio-valor" *ngIf="!montoInsuficiente">${{ cambio.toFixed(2) }}</span>
+            </div>
+        </div>
+
+        <!-- Factura -->
+        <div class="factura-section">
+            <label class="toggle-label">
+                <span class="toggle-switch">
+                    <input type="checkbox" [(ngModel)]="requiereFactura" />
+                    <span class="toggle-slider"></span>
+                </span>
+                ¿Requiere factura?
+            </label>
+
+            <div *ngIf="requiereFactura" class="factura-fields">
+                <div class="form-field">
+                    <label>Nombre</label>
+                    <input type="text" [(ngModel)]="datosCliente.nombre" placeholder="Nombre del cliente" />
+                </div>
+                <div class="form-field">
+                    <label>Email</label>
+                    <input type="email" [(ngModel)]="datosCliente.email" placeholder="correo@ejemplo.com" />
+                </div>
+                <div class="form-field">
+                    <label>Datos fiscales (RFC / Dirección)</label>
+                    <textarea [(ngModel)]="datosCliente.datos_fiscales" rows="2"
+                        placeholder="RFC y dirección fiscal..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="error-msg" *ngIf="errorCobro">{{ errorCobro }}</div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModalCobro()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmarCobro()" [disabled]="procesandoCobro || montoInsuficiente">
+            <span *ngIf="!procesandoCobro">Confirmar Cobro</span>
+            <span *ngIf="procesandoCobro" class="spinner-inline"></span>
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL CIERRE DE TURNO
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalCierre" (click)="cerrarModalCierre()"></div>
+<div class="modal" *ngIf="modalCierre">
+    <div class="modal-header">
+        <h3>Cerrar Turno</h3>
+        <button class="modal-close" (click)="cerrarModalCierre()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div *ngIf="cargandoCierre" class="loading-inline">
+            <div class="spinner"></div>
+        </div>
+
+        <div *ngIf="!cargandoCierre">
+            <div class="resumen-grid">
+                <div class="resumen-item">
+                    <span class="resumen-label">Efectivo</span>
+                    <span class="resumen-value">${{ resumenCierre.totalEfectivo.toFixed(2) }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Tarjeta</span>
+                    <span class="resumen-value">${{ resumenCierre.totalTarjeta.toFixed(2) }}</span>
+                </div>
+                <div class="resumen-item highlight">
+                    <span class="resumen-label">Total Ventas</span>
+                    <span class="resumen-value">${{ resumenCierre.totalVentas.toFixed(2) }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Transacciones</span>
+                    <span class="resumen-value">{{ resumenCierre.numTransacciones }}</span>
+                </div>
+            </div>
+
+            <div class="form-field" style="margin-top: 1rem;">
+                <label>Efectivo contado en caja ($)</label>
+                <input type="number" [(ngModel)]="efectivoEnCaja" min="0" step="0.01" />
+            </div>
+
+            <div class="diferencia-row" [class.positiva]="diferenciaCaja >= 0" [class.negativa]="diferenciaCaja < 0">
+                <span>Diferencia:</span>
+                <span>{{ diferenciaCaja >= 0 ? '+' : '' }}${{ diferenciaCaja.toFixed(2) }}</span>
+            </div>
+
+            <div class="error-msg" *ngIf="errorCierre">{{ errorCierre }}</div>
+        </div>
+    </div>
+    <div class="modal-footer" *ngIf="!cargandoCierre">
+        <button class="btn-secondary" (click)="cerrarModalCierre()">Cancelar</button>
+        <button class="btn-primary btn-danger" (click)="confirmarCierre()" [disabled]="cerrandoTurno">
+            <span *ngIf="!cerrandoTurno">Confirmar Cierre</span>
+            <span *ngIf="cerrandoTurno" class="spinner-inline"></span>
+        </button>
+    </div>
+</div>
+
+<!-- ═══ Toast ═══ -->
+<div class="toast" [class.visible]="toastVisible">
+    ✅ {{ toastMensaje }}
+</div>

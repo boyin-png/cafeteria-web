@@ -1,0 +1,150 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ══════════════════════════════════
+    // HELPER FUNCTIONS
+    // ══════════════════════════════════
+    function isAuth()   { return request.auth != null; }
+    function uid()      { return request.auth.uid; }
+    function perfil()   { return get(/databases/$(database)/documents/usuarios_staff/$(uid())).data; }
+    function rol()      { return perfil().rol; }
+    function activo()   { return perfil().activo; }
+    function isStaff()  { return isAuth() && activo() && rol() in ['admin','cocina','mesero','cajero']; }
+    function isAdmin()  { return isStaff() && rol() == 'admin'; }
+    function isCocina() { return isStaff() && rol() == 'cocina'; }
+    function isCajero() { return isStaff() && rol() == 'cajero'; }
+
+    // ══════════════════════════════════
+    // CONFIGURACIÓN DEL NEGOCIO
+    // ══════════════════════════════════
+    match /configuracion_negocio/{docId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // ══════════════════════════════════
+    // CATEGORÍAS
+    // ══════════════════════════════════
+    match /categorias/{catId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // ══════════════════════════════════
+    // PRODUCTOS
+    // ══════════════════════════════════
+    match /productos/{prodId} {
+      allow read:  if isAuth();
+      allow write: if isAdmin()
+                   && request.resource.data.precio > 0
+                   && request.resource.data.disponible is bool;
+    }
+
+    // ══════════════════════════════════
+    // MODIFICADORES DE PRODUCTOS
+    // ══════════════════════════════════
+    match /modificadores_productos/{modId} {
+      allow read:  if isAuth();
+      allow write: if isAdmin()
+                   && request.resource.data.precio_adicional >= 0;
+    }
+
+    // ══════════════════════════════════
+    // MESAS
+    // ══════════════════════════════════
+    match /mesas/{mesaId} {
+      allow read:   if isStaff();
+      allow create: if isAdmin();
+      allow update: if isStaff()
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'pedido_activo_id']);
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════
+    // PEDIDOS
+    // ══════════════════════════════════
+    match /pedidos/{pedidoId} {
+      allow read: if isStaff()
+                  || (isAuth() && resource.data.cliente_uid == uid());
+
+      allow create: if isAuth();
+
+      allow update: if isStaff() && (
+        // Admin puede cambiar cualquier campo
+        isAdmin()
+        // Cocina solo puede cambiar estado y cocinado_por_id
+        || (isCocina() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'cocinado_por_id']))
+        // Cajero puede cambiar estado, descuento y atendido_por
+        || (isCajero() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'descuento_aplicado', 'atendido_por_id']))
+        // Mesero puede cambiar estado y atendido_por
+        || (rol() == 'mesero' && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado', 'atendido_por_id']))
+      );
+
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════
+    // USUARIOS STAFF
+    // ══════════════════════════════════
+    match /usuarios_staff/{userId} {
+      allow read: if isAdmin()
+                  || (isStaff() && userId == uid());
+
+      allow create: if isAdmin();
+
+      allow update: if isAdmin()
+                    || (isStaff() && userId == uid()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pin_acceso']));
+
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════
+    // DESCUENTOS
+    // ══════════════════════════════════
+    match /descuentos/{descId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin()
+                   && request.resource.data.valor > 0
+                   && request.resource.data.tipo in ['porcentaje', 'monto_fijo'];
+    }
+
+    // ══════════════════════════════════
+    // INVENTARIO
+    // Cloud Functions usan admin SDK (bypasan rules)
+    // ══════════════════════════════════
+    match /inventario/{invId} {
+      allow read:  if isStaff();
+      allow write: if isAdmin();
+    }
+
+    // ══════════════════════════════════
+    // TURNOS DE CAJA
+    // ══════════════════════════════════
+    match /turnos_caja/{turnoId} {
+      allow read: if isAdmin()
+                  || (isCajero() && resource.data.cajero_id == uid());
+
+      allow create: if isCajero() || isAdmin();
+
+      // Solo admin puede agregar notas de cierre a un turno ya cerrado, dentro de las primeras 24h
+      allow update: if isAdmin()
+                    && resource.data.estado == 'cerrado'
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['notas_cierre'])
+                    && (request.time - resource.data.fecha_cierre.toMillis()) < duration.value(86400000, 'ms');
+
+      allow delete: if false;
+    }
+
+    // ══════════════════════════════════
+    // VENTAS HISTORIAL
+    // Solo Cloud Functions (admin SDK) pueden escribir
+    // ══════════════════════════════════
+    match /ventas_historial/{ventaId} {
+      allow read: if isAdmin()
+                  || (isCajero() && resource.data.cajero_id == uid());
+      allow write: if false;
+    }
+  }
+}

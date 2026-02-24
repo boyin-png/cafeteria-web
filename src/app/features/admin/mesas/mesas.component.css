@@ -1,0 +1,389 @@
+/* ══════════════════════════════════════
+   MESAS COMPONENT
+   ══════════════════════════════════════ */
+
+/* ── Header ── */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.contadores {
+    display: flex;
+    gap: 1rem;
+}
+
+.cont {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    background: #f3f4f6;
+}
+
+/* ── Layout ── */
+.layout {
+    display: flex;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.mesas-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.875rem;
+    align-content: flex-start;
+}
+
+/* ══════════════════════════════════════
+   MESA CARD
+   ══════════════════════════════════════ */
+.mesa-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem 0.75rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mesa-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mesa-card.selected {
+    box-shadow: 0 0 0 3px rgba(27, 79, 138, 0.3);
+}
+
+/* ── Estado colores ── */
+.mesa-libre {
+    background: #E8F5E9;
+    border-color: #66BB6A;
+}
+
+.mesa-ocupada {
+    background: #E3F2FD;
+    border-color: #42A5F5;
+}
+
+.mesa-sucia {
+    background: #FFF9C4;
+    border-color: #FFCA28;
+}
+
+.mesa-numero {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+/* ── Badges ── */
+.mesa-badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 0.175rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.mesa-badge.large {
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.75rem;
+}
+
+.badge-libre {
+    background: #C8E6C9;
+    color: #2E7D32;
+}
+
+.badge-ocupada {
+    background: #BBDEFB;
+    color: #1565C0;
+}
+
+.badge-sucia {
+    background: #FFF176;
+    color: #F57F17;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: #9ca3af;
+    padding: 3rem;
+}
+
+/* ══════════════════════════════════════
+   DETAIL PANEL
+   ══════════════════════════════════════ */
+.detail-panel {
+    width: 340px;
+    flex-shrink: 0;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 160px);
+    overflow-y: auto;
+    position: sticky;
+    top: 1.5rem;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.btn-close {
+    background: #f3f4f6;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    color: #6b7280;
+    transition: background 0.2s;
+}
+
+.btn-close:hover {
+    background: #e5e7eb;
+}
+
+.panel-estado {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.estado-label {
+    font-size: 0.8125rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ── Botón limpiar ── */
+.btn-accion {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-limpiar {
+    background: #FFF9C4;
+    color: #F57F17;
+}
+
+.btn-limpiar:hover {
+    background: #FFF176;
+}
+
+/* ── Info message ── */
+.panel-info-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem 0;
+    color: #9ca3af;
+}
+
+.info-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.panel-info-msg p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* ── Loading ── */
+.panel-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    color: #9ca3af;
+    font-size: 0.875rem;
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #1B4F8A;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ══════════════════════════════════════
+   PEDIDO DETAIL
+   ══════════════════════════════════════ */
+.pedido-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 70px;
+}
+
+.meta-label {
+    font-size: 0.6875rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+.meta-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+/* ── Items ── */
+.items-section h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.item-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.item-row:last-child {
+    border-bottom: none;
+}
+
+.item-info {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+}
+
+.item-qty {
+    font-weight: 800;
+    color: #1B4F8A;
+    font-size: 0.875rem;
+}
+
+.item-name {
+    font-size: 0.875rem;
+    color: #1a1a2e;
+}
+
+.item-price {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #059669;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Totals ── */
+.pedido-totals {
+    border-top: 2px solid #e5e7eb;
+    padding-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.total-final {
+    font-size: 1.0625rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    padding-top: 0.35rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.descuento {
+    color: #dc3545;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════ */
+@media (max-width: 768px) {
+    .layout {
+        flex-direction: column;
+    }
+
+    .detail-panel {
+        width: 100%;
+        position: static;
+        max-height: none;
+    }
+
+    .mesas-grid {
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    }
+}

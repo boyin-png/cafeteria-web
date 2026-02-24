@@ -1,0 +1,188 @@
+<div class="reportes-container">
+    <h2 class="page-title">📊 Reportes de Ventas</h2>
+
+    <!-- ═══ FILTROS ═══ -->
+    <div class="filtros-bar">
+        <div class="rango-rapido">
+            <button class="chip" [class.activo]="rangoSeleccionado === 'hoy'" (click)="setRango('hoy')">Hoy</button>
+            <button class="chip" [class.activo]="rangoSeleccionado === 'semana'" (click)="setRango('semana')">Esta
+                semana</button>
+            <button class="chip" [class.activo]="rangoSeleccionado === 'mes'" (click)="setRango('mes')">Este
+                mes</button>
+            <button class="chip" [class.activo]="rangoSeleccionado === 'custom'"
+                (click)="setRango('custom')">Personalizado</button>
+        </div>
+        <div class="rango-custom" *ngIf="rangoSeleccionado === 'custom'">
+            <input type="date" [(ngModel)]="fechaDesde" />
+            <span class="sep">—</span>
+            <input type="date" [(ngModel)]="fechaHasta" />
+        </div>
+        <button class="btn-primary" (click)="aplicar()" [disabled]="cargando">
+            {{ cargando ? 'Cargando...' : 'Aplicar' }}
+        </button>
+    </div>
+
+    <!-- Error -->
+    <div class="alert-error" *ngIf="errorGeneral">{{ errorGeneral }}</div>
+
+    <!-- Loading -->
+    <div class="loading-screen" *ngIf="cargando">
+        <div class="spinner"></div>
+    </div>
+
+    <div *ngIf="!cargando && metricas">
+        <!-- ═══ SECCIÓN 1: MÉTRICAS ═══ -->
+        <div class="metricas-grid">
+            <div class="metrica-card">
+                <span class="metrica-label">Total Ventas</span>
+                <span class="metrica-valor principal">{{ formatMoneda(metricas.totalVentas) }}</span>
+            </div>
+            <div class="metrica-card">
+                <span class="metrica-label">Efectivo</span>
+                <span class="metrica-valor">{{ formatMoneda(metricas.totalEfectivo) }}</span>
+            </div>
+            <div class="metrica-card">
+                <span class="metrica-label">Tarjeta</span>
+                <span class="metrica-valor">{{ formatMoneda(metricas.totalTarjeta) }}</span>
+            </div>
+            <div class="metrica-card">
+                <span class="metrica-label">Transacciones</span>
+                <span class="metrica-valor">{{ metricas.numTransacciones }}</span>
+            </div>
+            <div class="metrica-card">
+                <span class="metrica-label">Ticket Promedio</span>
+                <span class="metrica-valor">{{ formatMoneda(metricas.ticketPromedio) }}</span>
+            </div>
+            <div class="metrica-card">
+                <span class="metrica-label">Descuentos Aplicados</span>
+                <span class="metrica-valor descuento">{{ formatMoneda(metricas.totalDescuentos) }}</span>
+            </div>
+        </div>
+
+        <!-- ═══ SECCIÓN 2: GRÁFICA ═══ -->
+        <div class="chart-card" *ngIf="ventasPorDia.length > 0">
+            <h3>Ventas por Día</h3>
+            <div class="chart-wrapper">
+                <canvas #ventasChart></canvas>
+            </div>
+        </div>
+
+        <!-- ═══ SECCIÓN 3: TOP PRODUCTOS ═══ -->
+        <div class="section-card" *ngIf="metricas.productosTop.length > 0">
+            <h3>🏆 Top Productos</h3>
+            <table class="data-table striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Producto</th>
+                        <th>Unidades</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of metricas.productosTop; let i = index">
+                        <td class="pos-cell">{{ i + 1 }}</td>
+                        <td class="nombre-cell">{{ p.nombre }}</td>
+                        <td class="num-cell">{{ p.cantidad }}</td>
+                        <td class="money-cell">{{ formatMoneda(p.total) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ═══ SECCIÓN 4: HISTORIAL ═══ -->
+        <div class="section-card">
+            <h3>Historial de Transacciones</h3>
+
+            <div *ngIf="ventas.length === 0" class="empty-state">No hay ventas en este período.</div>
+
+            <table class="data-table striped" *ngIf="ventas.length > 0">
+                <thead>
+                    <tr>
+                        <th>Fecha / Hora</th>
+                        <th>Método</th>
+                        <th>Total</th>
+                        <th>Cajero</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let v of ventasPaginadas">
+                        <td class="fecha-cell">{{ formatFechaHora(v.fecha_pago) }}</td>
+                        <td>
+                            <span class="badge-metodo" [ngClass]="'metodo-' + v.metodo_pago">
+                                {{ v.metodo_pago === 'efectivo' ? '💵 Efectivo' : '💳 Tarjeta' }}
+                            </span>
+                        </td>
+                        <td class="money-cell">{{ formatMoneda(v.total_pagado) }}</td>
+                        <td class="cajero-cell">{{ v.cajero_id | slice:0:8 }}…</td>
+                        <td>
+                            <button class="btn-sm" (click)="verDetalle(v)">Ver detalle</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Paginación -->
+            <div class="paginacion" *ngIf="ventas.length > porPagina">
+                <button class="btn-pag" (click)="paginaAnterior()" [disabled]="pagina <= 1">← Anterior</button>
+                <span class="pag-info">{{ pagina }} / {{ totalPaginas }}</span>
+                <button class="btn-pag" (click)="paginaSiguiente()" [disabled]="pagina >= totalPaginas">Siguiente
+                    →</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL DETALLE ═══ -->
+<div class="modal-overlay" *ngIf="modalDetalle" (click)="cerrarDetalle()"></div>
+<div class="modal" *ngIf="modalDetalle && ventaDetalle">
+    <div class="modal-header">
+        <h3>Detalle de Venta</h3>
+        <button class="modal-close" (click)="cerrarDetalle()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="detalle-meta">
+            <div class="meta-item">
+                <span class="meta-label">Fecha</span>
+                <span>{{ formatFechaHora(ventaDetalle.fecha_pago) }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Método</span>
+                <span>{{ ventaDetalle.metodo_pago === 'efectivo' ? 'Efectivo' : 'Tarjeta' }}</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">Total Pagado</span>
+                <span class="total-dest">{{ formatMoneda(ventaDetalle.total_pagado) }}</span>
+            </div>
+        </div>
+
+        <h4>Ítems Vendidos</h4>
+        <ul class="items-list">
+            <li *ngFor="let item of ventaDetalle.items_vendidos">
+                <div class="item-info">
+                    <span class="item-qty">{{ item.cantidad }}×</span>
+                    <span>{{ item.nombre }}</span>
+                </div>
+                <span class="item-price">{{ formatMoneda(item.precio_snapshot * item.cantidad) }}</span>
+            </li>
+        </ul>
+
+        <div class="detalle-totals">
+            <div class="total-row"><span>Subtotal</span><span>{{ formatMoneda(ventaDetalle.subtotal) }}</span></div>
+            <div class="total-row" *ngIf="ventaDetalle.impuestos">
+                <span>Impuestos</span><span>{{ formatMoneda(ventaDetalle.impuestos) }}</span>
+            </div>
+            <div class="total-row" *ngIf="ventaDetalle.descuento_aplicado">
+                <span>Descuento</span>
+                <span class="descuento">-{{ formatMoneda(ventaDetalle.descuento_aplicado.monto_descontado) }}</span>
+            </div>
+            <div class="total-row total-final">
+                <span>Total</span><span>{{ formatMoneda(ventaDetalle.total_pagado) }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarDetalle()">Cerrar</button>
+    </div>
+</div>

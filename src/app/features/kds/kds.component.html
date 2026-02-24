@@ -1,0 +1,74 @@
+<div class="kds-container">
+    <!-- Header -->
+    <header class="kds-header">
+        <div class="header-left">
+            <span class="header-icon">🍳</span>
+            <h1>SmartOrder <span class="header-accent">KDS</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="clock">{{ horaActual }}</span>
+        </div>
+    </header>
+
+    <!-- Grid de pedidos -->
+    <div class="kds-grid" *ngIf="pedidosActivos$ | async as pedidos; else cargando">
+        <div *ngIf="pedidos.length === 0" class="empty-state">
+            <span class="empty-icon">✅</span>
+            <p>No hay pedidos pendientes</p>
+            <span class="empty-sub">Las nuevas comandas aparecerán aquí automáticamente</span>
+        </div>
+
+        <div *ngFor="let pedido of pedidos; trackBy: trackById" class="pedido-card"
+            [ngClass]="claseUrgencia(pedido.timestamp)">
+            <!-- Card header -->
+            <div class="card-header">
+                <div class="mesa-info">
+                    <span class="mesa-label">MESA</span>
+                    <span class="mesa-numero">{{ pedido.mesa_id }}</span>
+                </div>
+                <div class="card-meta">
+                    <span class="badge" [ngClass]="'badge-' + pedido.estado">
+                        {{ badgeEstado(pedido.estado) }}
+                    </span>
+                    <span class="tiempo" [ngClass]="claseUrgencia(pedido.timestamp)">
+                        ⏱ {{ tiempoEspera(pedido.timestamp) }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Items del pedido -->
+            <ul class="items-list">
+                <li *ngFor="let item of pedido.items" class="item-row">
+                    <div class="item-main">
+                        <span class="item-cantidad">{{ item.cantidad }}×</span>
+                        <span class="item-nombre">{{ item.nombre }}</span>
+                    </div>
+                    <!-- Modificadores aplicados -->
+                    <div *ngIf="item.modificadores_aplicados && item.modificadores_aplicados.length > 0"
+                        class="item-modificadores">
+                        <span *ngFor="let mod of item.modificadores_aplicados" class="mod-tag">
+                            + {{ mod.nombre }}
+                        </span>
+                    </div>
+                    <!-- Especificaciones -->
+                    <div *ngIf="item.especificaciones" class="item-especificaciones">
+                        "{{ item.especificaciones }}"
+                    </div>
+                </li>
+            </ul>
+
+            <!-- Botón de acción -->
+            <button class="btn-accion" [ngClass]="claseBoton(pedido.estado)" (click)="avanzarEstado(pedido)"
+                [disabled]="pedido.estado !== 'pendiente' && pedido.estado !== 'en_preparacion'">
+                {{ textoBoton(pedido.estado) }}
+            </button>
+        </div>
+    </div>
+
+    <ng-template #cargando>
+        <div class="loading-state">
+            <div class="loading-spinner"></div>
+            <p>Conectando con cocina...</p>
+        </div>
+    </ng-template>
+</div>

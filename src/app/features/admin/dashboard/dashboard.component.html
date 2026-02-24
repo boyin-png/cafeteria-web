@@ -1,0 +1,69 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <div class="welcome-section">
+            <h1>Buen día, {{ usuario()?.nombre || 'Colega' }} 👋</h1>
+            <p class="date">{{ ahora | date: 'fullDate' : '' : 'es-MX' }} | {{ ahora | date: 'shortTime' }}</p>
+        </div>
+        <button class="btn-refresh" (click)="cargarMetricas()" [disabled]="loading()">
+            <span class="refresh-icon" [class.spinning]="loading()">↻</span> Actualizar
+        </button>
+    </header>
+
+    <!-- Skeleton / Loader -->
+    <div *ngIf="loading()" class="metrics-grid">
+        <div class="metric-card skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+
+    <!-- Métricas -->
+    <div *ngIf="!loading()" class="metrics-grid">
+        <div class="metric-card sales">
+            <div class="icon">💰</div>
+            <div class="info">
+                <h3>Ventas del Día</h3>
+                <p class="value">{{ formatMoneda(ventasHoy()) }}</p>
+            </div>
+        </div>
+
+        <div class="metric-card tables">
+            <div class="icon">🪑</div>
+            <div class="info">
+                <h3>Mesas Activas</h3>
+                <p class="value">{{ mesasActivas() }}</p>
+            </div>
+        </div>
+
+        <div class="metric-card prep">
+            <div class="icon">🍳</div>
+            <div class="info">
+                <h3>En Preparación</h3>
+                <p class="value">{{ pedidosPrep() }}</p>
+            </div>
+        </div>
+
+        <div class="metric-card stock" [class.critical]="alertasInventario() > 0">
+            <div class="icon">📦</div>
+            <div class="info">
+                <h3>Alertas Stock</h3>
+                <p class="value">{{ alertasInventario() }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navegación Rápida -->
+    <section class="quick-nav">
+        <h2>Acciones Rápidas</h2>
+        <div class="nav-buttons">
+            <button *ngIf="alertasInventario() > 0" class="btn btn-danger" (click)="navegar('/admin/inventario')">
+                ⚠️ Ver alertas de inventario ({{ alertasInventario() }})
+            </button>
+
+            <button *ngIf="pedidosPrep() > 0" class="btn btn-warning" (click)="navegar('/kds')">
+                🍳 Ver cocina ({{ pedidosPrep() }} pendientes)
+            </button>
+
+            <button class="btn btn-primary" (click)="navegar('/admin/mesas')">
+                🍽️ Ver mesas
+            </button>
+        </div>
+    </section>
+</div>

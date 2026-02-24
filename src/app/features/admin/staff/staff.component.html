@@ -1,0 +1,152 @@
+<div class="staff-container">
+    <div class="page-header">
+        <h2 class="page-title">👥 Gestión de Staff</h2>
+        <button class="btn-primary" (click)="abrirModalCrear()">+ Nuevo Empleado</button>
+    </div>
+
+    <!-- Error general -->
+    <div class="alert-error" *ngIf="errorGeneral">
+        {{ errorGeneral }}
+        <button class="alert-close" (click)="errorGeneral = ''">✕</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-screen" *ngIf="cargando">
+        <div class="spinner"></div>
+        <p>Cargando staff...</p>
+    </div>
+
+    <!-- Tabla -->
+    <div class="table-wrapper" *ngIf="!cargando">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Activo</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of staff" [class.inactivo]="!user.activo">
+                    <td class="nombre-cell">
+                        {{ user.nombre }}
+                        <span class="badge-self" *ngIf="esMiUsuario(user.id)">Tú</span>
+                    </td>
+                    <td class="email-cell">{{ user.email }}</td>
+                    <td>
+                        <span class="badge-rol" [ngClass]="'rol-' + user.rol">{{ rolLabel(user.rol) }}</span>
+                    </td>
+                    <td>
+                        <button class="toggle-btn" [class.on]="user.activo" [class.off]="!user.activo"
+                            [disabled]="esMiUsuario(user.id)" (click)="toggleActivo(user)"
+                            [title]="esMiUsuario(user.id) ? 'No puedes desactivarte' : (user.activo ? 'Desactivar' : 'Activar')">
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn-icon" (click)="abrirModalEditar(user)" title="Editar">✏️</button>
+                    </td>
+                </tr>
+                <tr *ngIf="staff.length === 0">
+                    <td colspan="5" class="empty-cell">No hay empleados registrados.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL CREAR
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalCrear" (click)="cerrarModalCrear()"></div>
+<div class="modal" *ngIf="modalCrear">
+    <div class="modal-header">
+        <h3>Nuevo Empleado</h3>
+        <button class="modal-close" (click)="cerrarModalCrear()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="form-field">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="formCrear.nombre" placeholder="Nombre completo" />
+        </div>
+        <div class="form-field">
+            <label>Email *</label>
+            <input type="email" [(ngModel)]="formCrear.email" placeholder="correo@ejemplo.com" />
+        </div>
+        <div class="form-field">
+            <label>Contraseña *</label>
+            <div class="password-wrap">
+                <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formCrear.password"
+                    placeholder="Mínimo 6 caracteres" />
+                <button class="btn-eye" (click)="showPassword = !showPassword">
+                    {{ showPassword ? '🙈' : '👁️' }}
+                </button>
+            </div>
+        </div>
+        <div class="form-field">
+            <label>Rol *</label>
+            <select [(ngModel)]="formCrear.rol">
+                <option *ngFor="let r of roles" [value]="r">{{ rolLabel(r) }}</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label>PIN de acceso <span class="hint">(opcional, 4 dígitos)</span></label>
+            <input type="text" [(ngModel)]="formCrear.pin_acceso" maxlength="4" placeholder="1234" />
+        </div>
+
+        <div class="errors-list" *ngIf="erroresCrear.length">
+            <p *ngFor="let err of erroresCrear">{{ err }}</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModalCrear()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmarCrear()" [disabled]="isLoading">
+            {{ isLoading ? 'Creando...' : 'Crear Empleado' }}
+        </button>
+    </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL EDITAR
+     ════════════════════════════════════ -->
+<div class="modal-overlay" *ngIf="modalEditar" (click)="cerrarModalEditar()"></div>
+<div class="modal" *ngIf="modalEditar && staffEditando">
+    <div class="modal-header">
+        <h3>Editar Empleado</h3>
+        <button class="modal-close" (click)="cerrarModalEditar()">✕</button>
+    </div>
+    <div class="modal-body">
+        <div class="readonly-field">
+            <span class="readonly-label">Email</span>
+            <span class="readonly-value">{{ staffEditando.email }}</span>
+        </div>
+        <div class="form-field">
+            <label>Nombre *</label>
+            <input type="text" [(ngModel)]="formEditar.nombre" placeholder="Nombre completo" />
+        </div>
+        <div class="form-field">
+            <label>Rol *</label>
+            <select [(ngModel)]="formEditar.rol">
+                <option *ngFor="let r of roles" [value]="r">{{ rolLabel(r) }}</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label>PIN de acceso <span class="hint">(opcional, 4 dígitos)</span></label>
+            <input type="text" [(ngModel)]="formEditar.pin_acceso" maxlength="4" placeholder="1234" />
+        </div>
+
+        <div class="errors-list" *ngIf="erroresEditar.length">
+            <p *ngFor="let err of erroresEditar">{{ err }}</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button class="btn-secondary" (click)="cerrarModalEditar()">Cancelar</button>
+        <button class="btn-primary" (click)="confirmarEditar()" [disabled]="isLoading">
+            {{ isLoading ? 'Guardando...' : 'Guardar Cambios' }}
+        </button>
+    </div>
+</div>
