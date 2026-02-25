@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { StaffService } from './staff.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { UsuarioStaff, RolStaff } from '../../../core/models/usuario-staff.model';
@@ -8,7 +9,7 @@ import { UsuarioStaff, RolStaff } from '../../../core/models/usuario-staff.model
 @Component({
     selector: 'app-staff',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './staff.component.html',
     styleUrls: ['./staff.component.css']
 })

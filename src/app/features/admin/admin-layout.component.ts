@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RolStaff } from '../../core/models/usuario-staff.model';
+import { LucideAngularModule } from 'lucide-angular';
 
 interface NavItem {
     label: string;
@@ -14,35 +15,36 @@ interface NavItem {
 @Component({
     selector: 'app-admin-layout',
     standalone: true,
-    imports: [CommonModule, RouterModule],
+    imports: [CommonModule, RouterModule, LucideAngularModule],
     templateUrl: './admin-layout.component.html',
     styleUrls: ['./admin-layout.component.css']
 })
 export class AdminLayoutComponent {
-    private authService = inject(AuthService);
+    auth = inject(AuthService);
     private router = inject(Router);
 
     sidebarOpen = false;
+    sidebarExpanded = false;
 
     navItems: NavItem[] = [
-        { label: 'Dashboard', icon: '📊', route: '/admin/dashboard', roles: ['admin', 'cajero'] },
-        { label: 'Mesas', icon: '🪑', route: '/admin/mesas', roles: ['admin', 'cajero'] },
-        { label: 'Caja', icon: '💳', route: '/admin/caja', roles: ['admin', 'cajero'] },
-        { label: 'Menú', icon: '🍽️', route: '/admin/menu', roles: ['admin'] },
-        { label: 'Inventario', icon: '📦', route: '/admin/inventario', roles: ['admin'] },
-        { label: 'Staff', icon: '👥', route: '/admin/staff', roles: ['admin'] },
-        { label: 'Descuentos', icon: '🏷️', route: '/admin/descuentos', roles: ['admin'] },
-        { label: 'Reportes', icon: '📈', route: '/admin/reportes', roles: ['admin'] }
+        { label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard', roles: ['admin', 'cajero'] },
+        { label: 'Mesas', icon: 'layout-grid', route: '/admin/mesas', roles: ['admin', 'cajero'] },
+        { label: 'Caja', icon: 'credit-card', route: '/admin/caja', roles: ['admin', 'cajero'] },
+        { label: 'Menú', icon: 'utensils-crossed', route: '/admin/menu', roles: ['admin'] },
+        { label: 'Inventario', icon: 'package', route: '/admin/inventario', roles: ['admin'] },
+        { label: 'Staff', icon: 'users', route: '/admin/staff', roles: ['admin'] },
+        { label: 'Descuentos', icon: 'tag', route: '/admin/descuentos', roles: ['admin'] },
+        { label: 'Reportes', icon: 'bar-chart-2', route: '/admin/reportes', roles: ['admin'] }
     ];
 
     itemsVisibles = computed(() => {
-        const rol = this.authService.currentUser()?.rol;
+        const rol = this.auth.currentUser()?.rol;
         if (!rol) return [];
         return this.navItems.filter(item => item.roles.includes(rol));
     });
 
-    nombreUsuario = computed(() => this.authService.currentUser()?.nombre ?? '');
-    rolUsuario = computed(() => this.authService.currentUser()?.rol ?? '');
+    nombreUsuario = computed(() => this.auth.currentUser()?.nombre ?? '');
+    rolUsuario = computed(() => this.auth.currentUser()?.rol ?? '');
 
     toggleSidebar(): void {
         this.sidebarOpen = !this.sidebarOpen;
@@ -53,7 +55,7 @@ export class AdminLayoutComponent {
     }
 
     async logout(): Promise<void> {
-        await this.authService.logout();
+        await this.auth.logout();
         this.router.navigate(['/login']);
     }
 }

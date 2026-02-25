@@ -1,69 +1,84 @@
-<div class="dashboard-container">
-    <header class="dashboard-header">
-        <div class="welcome-section">
-            <h1>Buen día, {{ usuario()?.nombre || 'Colega' }} 👋</h1>
-            <p class="date">{{ ahora | date: 'fullDate' : '' : 'es-MX' }} | {{ ahora | date: 'shortTime' }}</p>
+<div class="page-wrapper">
+
+    <header class="page-header lona-header">
+        <div class="page-header-inner">
+            <div>
+                <h2>Dashboard</h2>
+                <p class="page-meta">
+                    <lucide-icon name="coffee" [size]="12"></lucide-icon>
+                    Buen dia, {{ auth.currentUser()?.nombre }}
+                </p>
+            </div>
+            <button class="btn btn-secondary btn-sm" (click)="recargar()" [disabled]="isLoading">
+                <lucide-icon name="refresh-cw" [size]="14" [class.spin]="isLoading"></lucide-icon>
+                Actualizar
+            </button>
         </div>
-        <button class="btn-refresh" (click)="cargarMetricas()" [disabled]="loading()">
-            <span class="refresh-icon" [class.spinning]="loading()">↻</span> Actualizar
-        </button>
     </header>
 
-    <!-- Skeleton / Loader -->
-    <div *ngIf="loading()" class="metrics-grid">
-        <div class="metric-card skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    <div class="metrics-grid">
+
+        <div class="metric-card">
+            <div class="metric-icon accent">
+                <lucide-icon name="trending-up" [size]="24"></lucide-icon>
+            </div>
+            <div class="metric-info">
+                <span class="metric-value">{{ metricas.ventasHoy | currency:"MXN":"symbol":"1.2-2" }}</span>
+                <span class="metric-label">Ventas del dia</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon primary">
+                <lucide-icon name="layout-grid" [size]="24"></lucide-icon>
+            </div>
+            <div class="metric-info">
+                <span class="metric-value">{{ metricas.mesasActivas }}</span>
+                <span class="metric-label">Mesas ocupadas</span>
+            </div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-icon warning">
+                <lucide-icon name="flame" [size]="24"></lucide-icon>
+            </div>
+            <div class="metric-info">
+                <span class="metric-value">{{ metricas.enPreparacion }}</span>
+                <span class="metric-label">En preparacion</span>
+            </div>
+        </div>
+
+        <div class="metric-card" [class.alert-active]="metricas.alertasInventario > 0">
+            <div class="metric-icon" [ngClass]="metricas.alertasInventario > 0 ? 'danger' : 'success'">
+                <lucide-icon name="package" [size]="24"></lucide-icon>
+            </div>
+            <div class="metric-info">
+                <span class="metric-value">{{ metricas.alertasInventario }}</span>
+                <span class="metric-label">Alertas de stock</span>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Métricas -->
-    <div *ngIf="!loading()" class="metrics-grid">
-        <div class="metric-card sales">
-            <div class="icon">💰</div>
-            <div class="info">
-                <h3>Ventas del Día</h3>
-                <p class="value">{{ formatMoneda(ventasHoy()) }}</p>
-            </div>
+    <div class="card quick-actions" *ngIf="metricas.enPreparacion > 0 || metricas.alertasInventario > 0">
+        <div class="card-header">
+            <lucide-icon name="bell" [size]="18"></lucide-icon>
+            Acciones sugeridas
         </div>
-
-        <div class="metric-card tables">
-            <div class="icon">🪑</div>
-            <div class="info">
-                <h3>Mesas Activas</h3>
-                <p class="value">{{ mesasActivas() }}</p>
-            </div>
-        </div>
-
-        <div class="metric-card prep">
-            <div class="icon">🍳</div>
-            <div class="info">
-                <h3>En Preparación</h3>
-                <p class="value">{{ pedidosPrep() }}</p>
-            </div>
-        </div>
-
-        <div class="metric-card stock" [class.critical]="alertasInventario() > 0">
-            <div class="icon">📦</div>
-            <div class="info">
-                <h3>Alertas Stock</h3>
-                <p class="value">{{ alertasInventario() }}</p>
-            </div>
+        <div class="actions-row">
+            <button class="btn btn-primary" *ngIf="metricas.enPreparacion > 0" routerLink="/kds">
+                <lucide-icon name="flame" [size]="15"></lucide-icon>
+                Ver cocina
+            </button>
+            <button class="btn btn-secondary" *ngIf="metricas.alertasInventario > 0" routerLink="/admin/inventario">
+                <lucide-icon name="alert-triangle" [size]="15"></lucide-icon>
+                Ver alertas de stock
+            </button>
+            <button class="btn btn-secondary" routerLink="/admin/mesas">
+                <lucide-icon name="layout-grid" [size]="15"></lucide-icon>
+                Ver mesas
+            </button>
         </div>
     </div>
 
-    <!-- Navegación Rápida -->
-    <section class="quick-nav">
-        <h2>Acciones Rápidas</h2>
-        <div class="nav-buttons">
-            <button *ngIf="alertasInventario() > 0" class="btn btn-danger" (click)="navegar('/admin/inventario')">
-                ⚠️ Ver alertas de inventario ({{ alertasInventario() }})
-            </button>
-
-            <button *ngIf="pedidosPrep() > 0" class="btn btn-warning" (click)="navegar('/kds')">
-                🍳 Ver cocina ({{ pedidosPrep() }} pendientes)
-            </button>
-
-            <button class="btn btn-primary" (click)="navegar('/admin/mesas')">
-                🍽️ Ver mesas
-            </button>
-        </div>
-    </section>
 </div>

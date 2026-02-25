@@ -8,10 +8,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { Pedido } from '../../core/models/pedido.model';
 import { where } from '@angular/fire/firestore';
 
+import { LucideAngularModule } from 'lucide-angular';
+
 @Component({
     selector: 'app-kds',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, LucideAngularModule],
     templateUrl: './kds.component.html',
     styleUrls: ['./kds.component.css']
 })

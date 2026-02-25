@@ -1,39 +1,47 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { FirestoreService, where } from '../../../core/services/firestore.service';
 import { ReportesService } from '../reportes/reportes.service';
+import { LucideAngularModule } from 'lucide-angular';
+
+export interface MetricasDashboard {
+    ventasHoy: number;
+    mesasActivas: number;
+    enPreparacion: number;
+    alertasInventario: number;
+}
 
 @Component({
     selector: 'app-dashboard',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule, LucideAngularModule],
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-    private authService = inject(AuthService);
+    auth = inject(AuthService);
     private fs = inject(FirestoreService);
     private reportesService = inject(ReportesService);
     private router = inject(Router);
 
-    usuario = this.authService.currentUser;
-    loading = signal(true);
+    isLoading = false;
     ahora = new Date();
 
-    // Métricas
-    ventasHoy = signal(0);
-    mesasActivas = signal(0);
-    pedidosPrep = signal(0);
-    alertasInventario = signal(0);
+    metricas: MetricasDashboard = {
+        ventasHoy: 0,
+        mesasActivas: 0,
+        enPreparacion: 0,
+        alertasInventario: 0
+    };
 
     ngOnInit() {
         this.cargarMetricas();
     }
 
     async cargarMetricas() {
-        this.loading.set(true);
+        this.isLoading = true;
         this.ahora = new Date();
 
         const hoyInicio = new Date(this.ahora);
@@ -49,22 +57,18 @@ export class DashboardComponent implements OnInit {
                 this.fs.getAll('inventario', where('alerta_activa', '==', true))
             ]);
 
-            this.ventasHoy.set(ventas.reduce((total, v) => total + v.total_pagado, 0));
-            this.mesasActivas.set(mesas.length);
-            this.pedidosPrep.set(pedidos.length);
-            this.alertasInventario.set(inventario.length);
+            this.metricas.ventasHoy = ventas.reduce((total, v) => total + v.total_pagado, 0);
+            this.metricas.mesasActivas = mesas.length;
+            this.metricas.enPreparacion = pedidos.length;
+            this.metricas.alertasInventario = inventario.length;
         } catch (error) {
             console.error('Error al cargar métricas:', error);
         } finally {
-            this.loading.set(false);
+            this.isLoading = false;
         }
     }
 
-    navegar(ruta: string) {
-        this.router.navigate([ruta]);
-    }
-
-    formatMoneda(valor: number): string {
-        return `$${valor.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+    recargar() {
+        this.cargarMetricas();
     }
 }

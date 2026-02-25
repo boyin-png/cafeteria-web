@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable } from 'rxjs';
 import { FirestoreService, where } from '../../../core/services/firestore.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
@@ -21,7 +20,6 @@ interface CobrarResponse {
 
 @Injectable({ providedIn: 'root' })
 export class CajaService {
-    private functions = inject(Functions);
     private firestoreService = inject(FirestoreService);
     private realtimeService = inject(RealtimeService);
 
@@ -53,41 +51,52 @@ export class CajaService {
     }
 
     /**
-     * Abre un nuevo turno de caja via Cloud Function.
+     * Abre un nuevo turno de caja via Cloud Function (Mocked).
      * @returns El ID del turno creado.
      */
     async abrirTurno(fondoInicial: number): Promise<string> {
         try {
-            const fn = httpsCallable<{ fondoInicial: number }, { turnoId: string }>(this.functions, 'abrirTurnoCaja');
-            const result = await fn({ fondoInicial });
-            return result.data.turnoId;
+            return await this.firestoreService.add('turnos_caja', {
+                fondo_inicial: fondoInicial,
+                estado: 'abierto',
+                fecha_apertura: new Date().toISOString()
+            } as any);
         } catch (error: any) {
             throw new Error(this.mapearError(error, 'No se pudo abrir el turno de caja.'));
         }
     }
 
     /**
-     * Cobra un pedido via Cloud Function.
+     * Cobra un pedido via Cloud Function (Mocked).
      * El servidor valida totales, IVA y permisos.
      */
     async cobrarPedido(payload: CobrarPayload): Promise<CobrarResponse> {
         try {
-            const fn = httpsCallable<CobrarPayload, CobrarResponse>(this.functions, 'cobrarPedido');
-            const result = await fn(payload);
-            return result.data;
+            await this.firestoreService.update('pedidos', payload.pedidoId, {
+                estado: 'pagado'
+            });
+            const ventaId = await this.firestoreService.add('ventas_historial', {
+                pedidoId: payload.pedidoId,
+                metodoPago: payload.metodoPago,
+                datosCliente: payload.datosCliente,
+                total: 0 // Mock total
+            });
+            return { ventaId, totalPagado: 0 };
         } catch (error: any) {
             throw new Error(this.mapearError(error, 'Error al procesar el cobro.'));
         }
     }
 
     /**
-     * Cierra el turno de caja actual via Cloud Function.
+     * Cierra el turno de caja actual via Cloud Function (Mocked).
      * El servidor calcula el resumen de ventas.
      */
     async cerrarTurno(turnoId: string): Promise<void> {
         try {
-            const fn = httpsCallable<{ turnoId: string }, void>(this.functions, 'cerrarTurnoCaja');
-            await fn({ turnoId });
+            await this.firestoreService.update('turnos_caja', turnoId, {
+                estado: 'cerrado',
+                fecha_cierre: new Date().toISOString()
+            });
         } catch (error: any) {
             throw new Error(this.mapearError(error, 'Error al cerrar el turno de caja.'));
         }
@@ -111,21 +120,6 @@ export class CajaService {
      * Traduce errores de HttpsError a mensajes en español.
      */
     private mapearError(error: any, fallback: string): string {
-        if (error?.code === 'functions/not-found') {
-            return 'La función solicitada no existe. Contacta al administrador.';
-        }
-        if (error?.code === 'functions/permission-denied') {
-            return 'No tienes permisos para realizar esta operación.';
-        }
-        if (error?.code === 'functions/invalid-argument') {
-            return error.message || 'Los datos enviados no son válidos.';
-        }
-        if (error?.code === 'functions/failed-precondition') {
-            return error.message || 'No se cumplen las condiciones para esta operación.';
-        }
-        if (error?.code === 'functions/unavailable') {
-            return 'Servicio no disponible. Intenta de nuevo en unos momentos.';
-        }
         if (error?.message) {
             return error.message;
         }

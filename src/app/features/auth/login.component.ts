@@ -4,11 +4,12 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { RolStaff } from '../../core/models/usuario-staff.model';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
     selector: 'app-login',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
+    imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.css']
 })
@@ -24,6 +25,7 @@ export class LoginComponent {
 
     isLoading = false;
     errorMessage = '';
+    showPassword = false;
 
     async onSubmit(): Promise<void> {
         if (this.loginForm.invalid) return;
@@ -34,8 +36,11 @@ export class LoginComponent {
         const { email, password } = this.loginForm.value;
 
         try {
-            const usuario = await this.authService.login(email, password);
-            this.redirigirPorRol(usuario.rol);
+            await this.authService.login(email, password);
+            const rol = this.authService.rol;
+            if (rol) {
+                this.redirigirPorRol(rol);
+            }
         } catch (error: any) {
             this.errorMessage = this.mapearError(error.message);
         } finally {

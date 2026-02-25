@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { Observable, of } from 'rxjs';
 import { CajaService } from './caja.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -12,7 +13,7 @@ import { MetodoPago, DetallesCliente } from '../../../core/models/venta-historia
 @Component({
     selector: 'app-caja',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './caja.component.html',
     styleUrls: ['./caja.component.css']
 })

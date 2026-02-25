@@ -1,21 +1,22 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
-    selector: 'app-unauthorized',
-    standalone: true,
-    imports: [RouterLink],
-    template: `
+  selector: 'app-unauthorized',
+  standalone: true,
+  imports: [RouterLink, LucideAngularModule],
+  template: `
     <div class="unauth-container">
       <div class="unauth-card">
-        <span class="unauth-icon">🔒</span>
+        <div style="margin-bottom: 1rem;"><lucide-icon name="lock" [size]="48" color="var(--color-primary-light)"></lucide-icon></div>
         <h1>Acceso Denegado</h1>
         <p>No tienes permisos para acceder a esta sección.</p>
         <a routerLink="/login" class="btn-back">Volver al inicio</a>
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .unauth-container {
       display: flex;
       align-items: center;

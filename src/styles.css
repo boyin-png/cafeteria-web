@@ -1,1 +1,127 @@
-/* You can add global styles to this file, and also import other style files */
+/* Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap");
+ 
+:root {
+  --color-primary:        #8B4513;
+  --color-primary-hover:  #A0522D;
+  --color-primary-light:  #C68B5A;
+  --color-primary-xlt:    #F0E6D8;
+  --color-bg:             #F5F0E8;
+  --color-surface:        #FDFAF5;
+  --color-bg-stripe:      #EDE8DF;
+  --color-cream:          #FFF8EE;
+  --color-text-primary:   #3B1F0A;
+  --color-text-secondary: #6B3F20;
+  --color-text-muted:     #A67C52;
+  --color-text-on-dark:   #FFF8EE;
+  --color-accent:         #B87333;
+  --color-accent-light:   #D4956A;
+  --color-success:        #556B2F;
+  --color-success-light:  #8FAF5A;
+  --color-success-bg:     #EBF2DA;
+  --color-danger:         #C0392B;
+  --color-danger-bg:      #FDECEA;
+  --color-warning:        #A0522D;
+  --color-warning-bg:     #FFF3E0;
+  --color-border:         #E8E4DE;
+  --color-border-dark:    #C68B5A;
+  --font-display: "Playfair Display", Georgia, serif;
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-body:    "DM Sans", system-ui, sans-serif;
+  --font-label:   "DM Sans", system-ui, sans-serif;
+  --font-mono:    "DM Mono", "Courier New", monospace;
+  --space-xs:4px; --space-sm:8px;  --space-md:16px;
+  --space-lg:24px;--space-xl:32px; --space-2xl:48px;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:16px; --radius-xl:24px;
+  --shadow-sm: 0 1px 3px rgba(59,31,10,.08),0 1px 2px rgba(59,31,10,.06);
+  --shadow-md: 0 4px 12px rgba(59,31,10,.10),0 2px 6px rgba(59,31,10,.08);
+  --shadow-lg: 0 8px 24px rgba(59,31,10,.12),0 4px 12px rgba(59,31,10,.08);
+  --transition: 200ms cubic-bezier(.4,0,.2,1);
+  --sidebar-w-collapsed: 64px;
+  --sidebar-w-expanded:  220px;
+}
+ 
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+body { font-family:var(--font-body); background:var(--color-bg);
+  color:var(--color-text-primary); line-height:1.6;
+  -webkit-font-smoothing:antialiased; }
+ 
+/* Clase lona bicolor - header de cafeteria */
+.lona-header {
+  background: linear-gradient(135deg, var(--color-primary) 50%, var(--color-accent) 50%);
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+.lona-header h2, .lona-header h3 { font-family:var(--font-heading); color:var(--color-cream); }
+ 
+/* Franja de rayas diagonales tipo lona */
+.lona-stripe {
+  height: 6px;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-primary)  0px, var(--color-primary)  10px,
+    var(--color-accent)   10px, var(--color-accent)  20px
+  );
+  border-radius: 999px;
+}
+ 
+/* Cards */
+.card { background:var(--color-surface); border:1px solid var(--color-border);
+  border-radius:var(--radius-md); box-shadow:var(--shadow-sm); padding:var(--space-lg); }
+.card-header { display:flex; align-items:center; gap:var(--space-sm);
+  padding-bottom:var(--space-md); margin-bottom:var(--space-md);
+  border-bottom:1px solid var(--color-border); font-family:var(--font-heading);
+  font-size:1.1rem; font-weight:600; color:var(--color-text-primary); }
+.card-header lucide-icon { color:var(--color-primary); }
+ 
+/* Botones */
+.btn { display:inline-flex; align-items:center; gap:var(--space-xs);
+  padding:10px var(--space-md); border-radius:var(--radius-sm);
+  font-family:var(--font-label); font-size:0.875rem; font-weight:500;
+  cursor:pointer; border:none; transition:background var(--transition),transform var(--transition); }
+.btn:active { transform:translateY(1px); }
+.btn-primary { background:var(--color-primary); color:var(--color-text-on-dark); }
+.btn-primary:hover { background:var(--color-primary-hover); }
+.btn-secondary { background:var(--color-surface); color:var(--color-text-primary);
+  border:1px solid var(--color-border-dark); }
+.btn-secondary:hover { background:var(--color-primary-xlt); }
+.btn-danger { background:var(--color-danger); color:white; }
+.btn-sm { padding:6px 12px; font-size:0.8rem; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+ 
+/* Inputs */
+.input { width:100%; padding:10px var(--space-md); border:1.5px solid var(--color-border);
+  border-radius:var(--radius-sm); font-family:var(--font-body); font-size:0.9rem;
+  background:var(--color-surface); color:var(--color-text-primary);
+  transition:border-color var(--transition); }
+.input:focus { outline:none; border-color:var(--color-primary);
+  box-shadow:0 0 0 3px rgba(139,69,19,.12); }
+ 
+/* Badges */
+.badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px;
+  border-radius:999px; font-family:var(--font-label); font-size:0.75rem; font-weight:500; }
+.badge-success { background:var(--color-success-bg); color:var(--color-success); }
+.badge-danger  { background:var(--color-danger-bg);  color:var(--color-danger);  }
+.badge-warning { background:var(--color-warning-bg); color:var(--color-warning); }
+.badge-accent  { background:var(--color-primary-xlt); color:var(--color-accent); }
+ 
+/* Tabla base */
+.table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+.table th { background:var(--color-primary-xlt); color:var(--color-text-secondary);
+  font-family:var(--font-label); font-weight:600; font-size:0.78rem;
+  text-transform:uppercase; letter-spacing:.04em;
+  padding:10px var(--space-md); text-align:left;
+  border-bottom:2px solid var(--color-border-dark); }
+.table td { padding:12px var(--space-md); border-bottom:1px solid var(--color-border); }
+.table tr:nth-child(even) td { background:var(--color-bg-stripe); }
+.table tr:hover td { background:var(--color-primary-xlt);
+  transition:background var(--transition); }
+ 
+/* Scrollbar */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:var(--color-bg); }
+::-webkit-scrollbar-thumb { background:var(--color-primary-light); border-radius:999px; }
+ 
+/* Animacion spinner */
+.spin { animation:spin 1s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }

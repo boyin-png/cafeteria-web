@@ -9,12 +9,14 @@
 
     <!-- Tabs -->
     <div class="tabs">
-        <button class="tab" [class.active]="tabActivo === 'categorias'" (click)="cambiarTab('categorias')">📂
+        <button class="tab" [class.active]="tabActivo === 'categorias'" (click)="cambiarTab('categorias')"><lucide-icon
+                name="folder" [size]="16"></lucide-icon>
             Categorías</button>
-        <button class="tab" [class.active]="tabActivo === 'productos'" (click)="cambiarTab('productos')">🍽️
+        <button class="tab" [class.active]="tabActivo === 'productos'" (click)="cambiarTab('productos')"><lucide-icon
+                name="utensils" [size]="16"></lucide-icon>
             Productos</button>
         <button class="tab" [class.active]="tabActivo === 'modificadores'" (click)="cambiarTab('modificadores')">
-            🔧 Modificadores
+            <lucide-icon name="wrench" [size]="16"></lucide-icon> Modificadores
             <span class="tab-badge" *ngIf="productoSeleccionado">{{ productoSeleccionado.nombre }}</span>
         </button>
     </div>
@@ -50,9 +52,11 @@
                             </label>
                         </td>
                         <td class="acciones">
-                            <button class="btn-icon" title="Editar" (click)="abrirEditarCategoria(cat)">✏️</button>
+                            <button class="btn-icon" title="Editar" (click)="abrirEditarCategoria(cat)"><lucide-icon
+                                    name="pencil" [size]="16"></lucide-icon></button>
                             <button class="btn-icon danger" title="Eliminar"
-                                (click)="eliminarCategoria(cat.id)">🗑️</button>
+                                (click)="eliminarCategoria(cat.id)"><lucide-icon name="trash-2"
+                                    [size]="16"></lucide-icon></button>
                         </td>
                     </tr>
                     <tr *ngIf="categorias.length === 0">
@@ -99,9 +103,11 @@
                             </label>
                         </td>
                         <td class="acciones">
-                            <button class="btn-icon" title="Editar" (click)="abrirEditarProducto(prod)">✏️</button>
+                            <button class="btn-icon" title="Editar" (click)="abrirEditarProducto(prod)"><lucide-icon
+                                    name="pencil" [size]="16"></lucide-icon></button>
                             <button class="btn-icon" title="Modificadores"
-                                (click)="seleccionarProducto(prod)">🔧</button>
+                                (click)="seleccionarProducto(prod)"><lucide-icon name="wrench"
+                                    [size]="16"></lucide-icon></button>
                         </td>
                     </tr>
                     <tr *ngIf="productos.length === 0">
@@ -153,8 +159,10 @@
                     </ul>
 
                     <div class="mod-actions">
-                        <button class="btn-sm" (click)="abrirEditarModificador(mod)">✏️ Editar</button>
-                        <button class="btn-sm danger" (click)="onEliminarModificador(mod.id)">🗑️ Eliminar</button>
+                        <button class="btn-sm" (click)="abrirEditarModificador(mod)"><lucide-icon name="pencil"
+                                [size]="14"></lucide-icon> Editar</button>
+                        <button class="btn-sm danger" (click)="onEliminarModificador(mod.id)"><lucide-icon
+                                name="trash-2" [size]="14"></lucide-icon> Eliminar</button>
                     </div>
                 </div>
 

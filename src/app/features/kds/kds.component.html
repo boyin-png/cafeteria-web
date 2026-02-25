@@ -1,74 +1,97 @@
-<div class="kds-container">
-    <!-- Header -->
+<div class="kds-shell">
+
     <header class="kds-header">
-        <div class="header-left">
-            <span class="header-icon">🍳</span>
-            <h1>SmartOrder <span class="header-accent">KDS</span></h1>
+        <div class="kds-brand">
+            <lucide-icon name="flame" [size]="28" class="kds-brand-icon"></lucide-icon>
+            <div>
+                <h1 class="kds-title">Cocina</h1>
+                <p class="kds-subtitle">Comandas activas en tiempo real</p>
+            </div>
         </div>
-        <div class="header-right">
-            <span class="clock">{{ horaActual }}</span>
+        <div class="kds-status">
+            <div class="kds-clock">
+                <lucide-icon name="clock" [size]="15"></lucide-icon>
+                <span>{{ horaActual }}</span>
+            </div>
+            <ng-container *ngIf="pedidosActivos$ | async as pedidos">
+                <div class="kds-badge-count">
+                    <span class="count-num">{{ pedidos.length }}</span>
+                    <span class="count-label">comandas</span>
+                </div>
+            </ng-container>
         </div>
     </header>
 
-    <!-- Grid de pedidos -->
-    <div class="kds-grid" *ngIf="pedidosActivos$ | async as pedidos; else cargando">
-        <div *ngIf="pedidos.length === 0" class="empty-state">
-            <span class="empty-icon">✅</span>
-            <p>No hay pedidos pendientes</p>
-            <span class="empty-sub">Las nuevas comandas aparecerán aquí automáticamente</span>
-        </div>
+    <div class="kds-lona"></div>
 
-        <div *ngFor="let pedido of pedidos; trackBy: trackById" class="pedido-card"
-            [ngClass]="claseUrgencia(pedido.timestamp)">
-            <!-- Card header -->
-            <div class="card-header">
-                <div class="mesa-info">
-                    <span class="mesa-label">MESA</span>
-                    <span class="mesa-numero">{{ pedido.mesa_id }}</span>
-                </div>
-                <div class="card-meta">
-                    <span class="badge" [ngClass]="'badge-' + pedido.estado">
-                        {{ badgeEstado(pedido.estado) }}
-                    </span>
-                    <span class="tiempo" [ngClass]="claseUrgencia(pedido.timestamp)">
-                        ⏱ {{ tiempoEspera(pedido.timestamp) }}
-                    </span>
-                </div>
+    <div class="kds-body">
+        <ng-container *ngIf="pedidosActivos$ | async as pedidos; else loadingTpl">
+
+            <div class="kds-empty" *ngIf="pedidos.length === 0">
+                <lucide-icon name="check-circle" [size]="52"></lucide-icon>
+                <p>Sin comandas pendientes</p>
+                <span>La cocina esta al dia</span>
             </div>
 
-            <!-- Items del pedido -->
-            <ul class="items-list">
-                <li *ngFor="let item of pedido.items" class="item-row">
-                    <div class="item-main">
-                        <span class="item-cantidad">{{ item.cantidad }}×</span>
-                        <span class="item-nombre">{{ item.nombre }}</span>
-                    </div>
-                    <!-- Modificadores aplicados -->
-                    <div *ngIf="item.modificadores_aplicados && item.modificadores_aplicados.length > 0"
-                        class="item-modificadores">
-                        <span *ngFor="let mod of item.modificadores_aplicados" class="mod-tag">
-                            + {{ mod.nombre }}
-                        </span>
-                    </div>
-                    <!-- Especificaciones -->
-                    <div *ngIf="item.especificaciones" class="item-especificaciones">
-                        "{{ item.especificaciones }}"
-                    </div>
-                </li>
-            </ul>
+            <div class="kds-grid">
+                <div *ngFor="let pedido of pedidos; trackBy: trackById" class="comanda-card"
+                    [ngClass]="claseUrgencia(pedido.timestamp)">
 
-            <!-- Botón de acción -->
-            <button class="btn-accion" [ngClass]="claseBoton(pedido.estado)" (click)="avanzarEstado(pedido)"
-                [disabled]="pedido.estado !== 'pendiente' && pedido.estado !== 'en_preparacion'">
-                {{ textoBoton(pedido.estado) }}
-            </button>
-        </div>
+                    <div class="urgencia-bar"></div>
+
+                    <div class="comanda-head">
+                        <div class="mesa-num">
+                            <lucide-icon name="hash" [size]="14"></lucide-icon>
+                            Mesa {{ pedido.mesa_id }}
+                        </div>
+                        <div class="comanda-chips">
+                            <span class="time-chip">
+                                <lucide-icon name="clock" [size]="12"></lucide-icon>
+                                {{ tiempoEspera(pedido.timestamp) }}
+                            </span>
+                            <span class="estado-chip" [ngClass]="pedido.estado">
+                                {{ pedido.estado | titlecase }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <ul class="items-list">
+                        <li *ngFor="let item of pedido.items" class="item-row">
+                            <span class="item-qty">{{ item.cantidad }}x</span>
+                            <div class="item-body">
+                                <span class="item-nombre">{{ item.nombre }}</span>
+                                <ul class="mods" *ngIf="item.modificadores_aplicados.length">
+                                    <li *ngFor="let m of item.modificadores_aplicados">
+                                        <lucide-icon name="chevron-right" [size]="10"></lucide-icon>
+                                        {{ m.nombre }}
+                                    </li>
+                                </ul>
+                                <p class="item-nota" *ngIf="item.especificaciones">
+                                    <lucide-icon name="clipboard-list" [size]="11"></lucide-icon>
+                                    {{ item.especificaciones }}
+                                </p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <button class="btn-avanzar" [ngClass]="pedido.estado" (click)="avanzarEstado(pedido)"
+                        [disabled]="pedido.estado === 'listo'">
+                        <lucide-icon
+                            [name]="pedido.estado === 'pendiente' ? 'flame' : (pedido.estado === 'en_preparacion' ? 'check-circle' : 'circle')"
+                            [size]="17"></lucide-icon>
+                        <span *ngIf="pedido.estado === 'pendiente'">Iniciar preparacion</span>
+                        <span *ngIf="pedido.estado === 'en_preparacion'">Marcar como listo</span>
+                        <span *ngIf="pedido.estado === 'listo'">Listo</span>
+                    </button>
+                </div>
+            </div>
+        </ng-container>
+
+        <ng-template #loadingTpl>
+            <div class="kds-loading">
+                <lucide-icon name="refresh-cw" [size]="36" class="spin"></lucide-icon>
+                <p>Conectando con cocina...</p>
+            </div>
+        </ng-template>
     </div>
-
-    <ng-template #cargando>
-        <div class="loading-state">
-            <div class="loading-spinner"></div>
-            <p>Conectando con cocina...</p>
-        </div>
-    </ng-template>
 </div>

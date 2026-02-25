@@ -1,5 +1,6 @@
 <div class="reportes-container">
-    <h2 class="page-title">📊 Reportes de Ventas</h2>
+    <h2 class="page-title"><lucide-icon name="bar-chart-2" [size]="24" class="title-icon"></lucide-icon> Reportes de
+        Ventas</h2>
 
     <!-- ═══ FILTROS ═══ -->
     <div class="filtros-bar">
@@ -69,7 +70,8 @@
 
         <!-- ═══ SECCIÓN 3: TOP PRODUCTOS ═══ -->
         <div class="section-card" *ngIf="metricas.productosTop.length > 0">
-            <h3>🏆 Top Productos</h3>
+            <h3><lucide-icon name="award" [size]="20" color="var(--color-primary-light)"></lucide-icon> Top Productos
+            </h3>
             <table class="data-table striped">
                 <thead>
                     <tr>
@@ -111,7 +113,9 @@
                         <td class="fecha-cell">{{ formatFechaHora(v.fecha_pago) }}</td>
                         <td>
                             <span class="badge-metodo" [ngClass]="'metodo-' + v.metodo_pago">
-                                {{ v.metodo_pago === 'efectivo' ? '💵 Efectivo' : '💳 Tarjeta' }}
+                                <lucide-icon [name]="v.metodo_pago === 'efectivo' ? 'banknote' : 'credit-card'"
+                                    [size]="14" class="inline-icon"></lucide-icon>
+                                {{ v.metodo_pago === 'efectivo' ? 'Efectivo' : 'Tarjeta' }}
                             </span>
                         </td>
                         <td class="money-cell">{{ formatMoneda(v.total_pagado) }}</td>

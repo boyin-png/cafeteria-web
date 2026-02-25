@@ -1,58 +1,57 @@
-<div class="login-container">
+<div class="login-wrapper">
   <div class="login-card">
+
+    <!-- Franja lona decorativa superior -->
+    <div class="login-lona"></div>
+
+    <!-- Header de la card -->
     <div class="login-header">
-      <div class="logo-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="40" height="40">
-          <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
-          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8z"/>
-          <line x1="6" y1="2" x2="6" y2="4"/>
-          <line x1="10" y1="2" x2="10" y2="4"/>
-          <line x1="14" y1="2" x2="14" y2="4"/>
-        </svg>
-      </div>
-      <h1>SmartOrder Sync</h1>
-      <p class="subtitle">Sistema de Gestión de Cafetería</p>
+      <lucide-icon name="coffee" [size]="40" class="login-logo-icon"></lucide-icon>
+      <h1 class="login-logo-text">SmartOrder</h1>
+      <p class="login-subtitle">Sistema de gestion</p>
     </div>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="off">
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input
-          id="email"
-          type="email"
-          formControlName="email"
-          placeholder="usuario@correo.com"
-          [class.input-error]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-        />
-        <span class="field-error"
-              *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
-          Ingresa un correo válido.
-        </span>
+    <!-- Formulario -->
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+      <div class="input-group">
+        <label class="input-label">
+          <lucide-icon name="mail" [size]="14"></lucide-icon>
+          Correo electronico
+        </label>
+        <input class="input" type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email">
       </div>
 
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          type="password"
-          formControlName="password"
-          placeholder="••••••••"
-          [class.input-error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-        />
+      <div class="input-group">
+        <label class="input-label">
+          <lucide-icon name="lock" [size]="14"></lucide-icon>
+          Contrasena
+        </label>
+        <div class="input-wrapper">
+          <input class="input" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+            placeholder="Ingresa tu contrasena" autocomplete="current-password">
+          <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
+            <lucide-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="18"></lucide-icon>
+          </button>
+        </div>
       </div>
 
-      <button type="submit" class="btn-login" [disabled]="loginForm.invalid || isLoading">
-        <span *ngIf="!isLoading">Iniciar Sesión</span>
-        <span *ngIf="isLoading" class="spinner-wrapper">
-          <span class="spinner"></span>
-          Ingresando...
-        </span>
-      </button>
-
-      <div class="error-message" *ngIf="errorMessage">
+      <div class="error-msg" *ngIf="errorMessage">
+        <lucide-icon name="alert-triangle" [size]="16"></lucide-icon>
         {{ errorMessage }}
       </div>
+
+      <button type="submit" class="btn btn-primary login-btn" [disabled]="isLoading || loginForm.invalid">
+        <lucide-icon *ngIf="isLoading" name="refresh-cw" [size]="16" class="spin"></lucide-icon>
+        <span *ngIf="!isLoading">Iniciar sesion</span>
+        <span *ngIf="isLoading">Verificando...</span>
+      </button>
+
     </form>
+
+    <div class="login-footer">
+      <lucide-icon name="coffee" [size]="12"></lucide-icon>
+      SmartOrder Sync v1.0
+    </div>
   </div>
 </div>

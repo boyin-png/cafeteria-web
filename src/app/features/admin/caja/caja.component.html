@@ -9,7 +9,8 @@
      ════════════════════════════════════ -->
 <div class="abrir-turno-screen" *ngIf="!cargandoTurno && !turnoActivo">
     <div class="turno-card">
-        <div class="turno-icon">💰</div>
+        <div class="turno-icon"><lucide-icon name="wallet" [size]="48" color="var(--color-primary-light)"></lucide-icon>
+        </div>
         <h2>Abrir Turno de Caja</h2>
         <p class="turno-desc">Ingresa el fondo inicial para comenzar tu jornada.</p>
 
@@ -48,7 +49,8 @@
 
     <div *ngIf="pedidosParaCobrar$ | async as pedidos; else cargandoPedidos">
         <div *ngIf="pedidos.length === 0" class="empty-state">
-            <span class="empty-icon">☕</span>
+            <span class="empty-icon"><lucide-icon name="coffee" [size]="48"
+                    color="var(--color-primary-light)"></lucide-icon></span>
             <p>No hay pedidos pendientes de cobro</p>
             <span class="empty-sub">Los pedidos entregados aparecerán aquí automáticamente</span>
         </div>
@@ -116,11 +118,11 @@
         <div class="metodo-pago">
             <label class="radio-card" [class.selected]="metodoPago === 'efectivo'">
                 <input type="radio" name="metodoPago" value="efectivo" [(ngModel)]="metodoPago" />
-                <span class="radio-icon">💵</span> Efectivo
+                <span class="radio-icon"><lucide-icon name="banknote" [size]="18"></lucide-icon></span> Efectivo
             </label>
             <label class="radio-card" [class.selected]="metodoPago === 'tarjeta'">
                 <input type="radio" name="metodoPago" value="tarjeta" [(ngModel)]="metodoPago" />
-                <span class="radio-icon">💳</span> Tarjeta
+                <span class="radio-icon"><lucide-icon name="credit-card" [size]="18"></lucide-icon></span> Tarjeta
             </label>
         </div>
 
@@ -232,5 +234,5 @@
 
 <!-- ═══ Toast ═══ -->
 <div class="toast" [class.visible]="toastVisible">
-    ✅ {{ toastMensaje }}
+    <lucide-icon name="check-circle" [size]="16" color="var(--color-success)"></lucide-icon> {{ toastMensaje }}
 </div>

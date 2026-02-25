@@ -1,59 +1,50 @@
 import { Injectable, inject } from '@angular/core';
-import {
-    Firestore,
-    collection,
-    doc,
-    addDoc,
-    setDoc,
-    updateDoc,
-    deleteDoc,
-    getDoc,
-    getDocs,
-    query,
-    QueryConstraint,
-    where,
-    orderBy,
-    limit
-} from '@angular/fire/firestore';
+import { DATA_SERVICE } from '../tokens/service-tokens';
+import { QueryFiltro } from '../abstractions/data.abstract';
 
-export { where, orderBy, limit };
+export function where(campo: string, operador: any, valor: any): QueryFiltro {
+    return { campo, operador, valor };
+}
+
+export function orderBy(campo: string, direccion?: any): any {
+    return { campo, direccion, tipo: 'orderBy' };
+}
+
+export function limit(lim: number): any {
+    return { limite: lim, tipo: 'limit' };
+}
 
 @Injectable({ providedIn: 'root' })
 export class FirestoreService {
-    private firestore = inject(Firestore);
+    private dataService = inject(DATA_SERVICE);
 
     /**
      * Agrega un documento nuevo con ID autogenerado.
      * @returns El ID del documento creado.
      */
     async add<T extends Record<string, any>>(coleccion: string, data: T): Promise<string> {
-        const colRef = collection(this.firestore, coleccion);
-        const docRef = await addDoc(colRef, data);
-        return docRef.id;
+        return this.dataService.add(coleccion, data);
     }
 
     /**
      * Crea o sobreescribe un documento con un ID específico.
      */
     async set<T extends Record<string, any>>(coleccion: string, id: string, data: T): Promise<void> {
-        const docRef = doc(this.firestore, coleccion, id);
-        await setDoc(docRef, data);
+        await this.dataService.update(coleccion, id, data);
     }
 
     /**
      * Actualiza campos específicos de un documento existente.
      */
     async update(coleccion: string, id: string, data: Record<string, any>): Promise<void> {
-        const docRef = doc(this.firestore, coleccion, id);
-        await updateDoc(docRef, data);
+        await this.dataService.update(coleccion, id, data);
     }
 
     /**
      * Elimina un documento por su ID.
      */
     async delete(coleccion: string, id: string): Promise<void> {
-        const docRef = doc(this.firestore, coleccion, id);
-        await deleteDoc(docRef);
+        await this.dataService.delete(coleccion, id);
     }
 
     /**
@@ -61,20 +52,15 @@ export class FirestoreService {
      * @returns El documento con campo 'id' incluido, o null si no existe.
      */
     async getById<T>(coleccion: string, id: string): Promise<T | null> {
-        const docRef = doc(this.firestore, coleccion, id);
-        const snap = await getDoc(docRef);
-        if (!snap.exists()) return null;
-        return { id: snap.id, ...snap.data() } as T;
+        return this.dataService.getById<T>(coleccion, id);
     }
 
     /**
      * Obtiene todos los documentos de una colección, opcionalmente filtrados.
      * @param constraints where(), orderBy(), limit(), etc.
      */
-    async getAll<T>(coleccion: string, ...constraints: QueryConstraint[]): Promise<T[]> {
-        const colRef = collection(this.firestore, coleccion);
-        const q = constraints.length > 0 ? query(colRef, ...constraints) : query(colRef);
-        const snap = await getDocs(q);
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }) as T);
+    async getAll<T>(coleccion: string, ...constraints: any[]): Promise<T[]> {
+        const filtros = constraints.filter(c => !c.tipo) as QueryFiltro[];
+        return this.dataService.getAll<T>(coleccion, filtros);
     }
 }

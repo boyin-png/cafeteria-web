@@ -1,6 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { MenuService } from './menu.service';
 import { Categoria } from '../../../core/models/categoria.model';
 import { Producto } from '../../../core/models/producto.model';
@@ -12,7 +13,7 @@ type ModalType = 'categoria' | 'producto' | 'modificador' | null;
 @Component({
     selector: 'app-menu',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './menu.component.html',
     styleUrls: ['./menu.component.css']
 })

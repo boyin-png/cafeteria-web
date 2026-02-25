@@ -3,9 +3,12 @@
     <div class="page-header">
         <h2 class="page-title">Gestión de Mesas</h2>
         <div class="contadores" *ngIf="actualizarContadores(mesas)">
-            <span class="cont ocupadas">🔵 {{ contadores.ocupadas }} ocupadas</span>
-            <span class="cont libres">🟢 {{ contadores.libres }} libres</span>
-            <span class="cont sucias">🟡 {{ contadores.sucias }} sucias</span>
+            <span class="cont ocupadas"><lucide-icon name="circle" [size]="14"
+                    color="var(--color-primary-light)"></lucide-icon> {{ contadores.ocupadas }} ocupadas</span>
+            <span class="cont libres"><lucide-icon name="circle" [size]="14" color="var(--color-success)"></lucide-icon>
+                {{ contadores.libres }} libres</span>
+            <span class="cont sucias"><lucide-icon name="circle" [size]="14" color="var(--color-warning)"></lucide-icon>
+                {{ contadores.sucias }} sucias</span>
         </div>
     </div>
 
@@ -42,12 +45,13 @@
             <!-- Mesa sucia → botón limpiar -->
             <button *ngIf="mesaSeleccionada.estado === 'sucia'" class="btn-accion btn-limpiar"
                 (click)="cambiarEstado(mesaSeleccionada.id, 'libre')">
-                🧹 Marcar como Libre
+                <lucide-icon name="sparkles" [size]="16"></lucide-icon> Marcar como Libre
             </button>
 
             <!-- Mesa libre -->
             <div *ngIf="mesaSeleccionada.estado === 'libre'" class="panel-info-msg">
-                <span class="info-icon">✅</span>
+                <span class="info-icon"><lucide-icon name="check-circle" [size]="24"
+                        color="var(--color-success)"></lucide-icon></span>
                 <p>Mesa disponible para nuevos pedidos.</p>
             </div>
 
@@ -105,7 +109,8 @@
                 </div>
 
                 <div *ngIf="!cargandoPedido && !pedidoActivo" class="panel-info-msg">
-                    <span class="info-icon">⚠️</span>
+                    <span class="info-icon"><lucide-icon name="alert-triangle" [size]="24"
+                            color="var(--color-warning)"></lucide-icon></span>
                     <p>No se pudo cargar el pedido activo.</p>
                 </div>
             </div>

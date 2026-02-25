@@ -1,8 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Functions, httpsCallable } from '@angular/fire/functions';
-import { FirestoreService } from '../../../core/services/firestore.service';
+import { FirestoreService, orderBy } from '../../../core/services/firestore.service';
 import { UsuarioStaff, RolStaff } from '../../../core/models/usuario-staff.model';
-import { orderBy } from '@angular/fire/firestore';
 
 interface CrearStaffPayload {
     nombre: string;
@@ -14,7 +12,6 @@ interface CrearStaffPayload {
 
 @Injectable({ providedIn: 'root' })
 export class StaffService {
-    private functions = inject(Functions);
     private fs = inject(FirestoreService);
 
     /**
@@ -29,24 +26,13 @@ export class StaffService {
     }
 
     /**
-     * Crea un nuevo usuario vía Cloud Function (Auth + Firestore doc en servidor).
+     * Crea un nuevo usuario vía Cloud Function (Mocked).
      * @returns UID del usuario creado.
      */
     async crearStaff(data: CrearStaffPayload): Promise<string> {
         try {
-            const fn = httpsCallable<CrearStaffPayload, { uid: string }>(this.functions, 'crearUsuarioStaff');
-            const result = await fn(data);
-            return result.data.uid;
+            return await this.fs.add('usuarios_staff', data);
         } catch (error: any) {
-            if (error?.code === 'functions/already-exists') {
-                throw new Error('Ya existe un usuario con ese correo electrónico.');
-            }
-            if (error?.code === 'functions/invalid-argument') {
-                throw new Error(error.message || 'Datos inválidos para crear el usuario.');
-            }
-            if (error?.code === 'functions/permission-denied') {
-                throw new Error('No tienes permisos para crear usuarios.');
-            }
             throw new Error(error.message || 'Error al crear el usuario.');
         }
     }

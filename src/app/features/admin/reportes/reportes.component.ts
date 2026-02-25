@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 import { ReportesService, MetricasReporte, VentaDia } from './reportes.service';
 import { VentaHistorial } from '../../../core/models/venta-historial.model';
 import { Chart, registerables } from 'chart.js';
@@ -12,7 +13,7 @@ type RangoRapido = 'hoy' | 'semana' | 'mes' | 'custom';
 @Component({
     selector: 'app-reportes',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, LucideAngularModule],
     templateUrl: './reportes.component.html',
     styleUrls: ['./reportes.component.css']
 })

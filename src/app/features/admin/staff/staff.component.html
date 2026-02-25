@@ -1,6 +1,7 @@
 <div class="staff-container">
     <div class="page-header">
-        <h2 class="page-title">👥 Gestión de Staff</h2>
+        <h2 class="page-title"><lucide-icon name="users" [size]="24" class="title-icon"></lucide-icon> Gestión de Staff
+        </h2>
         <button class="btn-primary" (click)="abrirModalCrear()">+ Nuevo Empleado</button>
     </div>
 
@@ -48,8 +49,8 @@
                         </button>
                     </td>
                     <td>
-                        <button class="btn-icon" (click)="abrirModalEditar(user)" title="Editar">✏️</button>
-                    </td>
+                        <button class="btn-icon" (click)="abrirModalEditar(user)" title="Editar"><lucide-icon
+                                name="pencil" [size]="16"></lucide-icon></button>
                 </tr>
                 <tr *ngIf="staff.length === 0">
                     <td colspan="5" class="empty-cell">No hay empleados registrados.</td>
@@ -83,7 +84,7 @@
                 <input [type]="showPassword ? 'text' : 'password'" [(ngModel)]="formCrear.password"
                     placeholder="Mínimo 6 caracteres" />
                 <button class="btn-eye" (click)="showPassword = !showPassword">
-                    {{ showPassword ? '🙈' : '👁️' }}
+                    <lucide-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="18"></lucide-icon>
                 </button>
             </div>
         </div>
