@@ -18,7 +18,7 @@ export const routes: Routes = [
     {
         path: 'admin',
         canActivate: [authGuard, roleGuard],
-        data: { roles: ['admin', 'cajero'] },
+        data: { roles: ['admin', 'cajero', 'mesero'] },
         loadComponent: () =>
             import('./features/admin/admin-layout.component').then(m => m.AdminLayoutComponent),
         children: [
@@ -37,7 +37,7 @@ export const routes: Routes = [
             {
                 path: 'mesas',
                 canActivate: [roleGuard],
-                data: { roles: ['admin', 'cajero'] },
+                data: { roles: ['admin', 'cajero', 'mesero'] },
                 loadComponent: () =>
                     import('./features/admin/mesas/mesas.component').then(m => m.MesasComponent)
             },

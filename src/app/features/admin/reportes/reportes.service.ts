@@ -32,7 +32,8 @@ export class ReportesService {
                 where('fecha_pago', '<=', fechaFin.toISOString()),
                 orderBy('fecha_pago')
             );
-        } catch {
+        } catch (error) {
+            console.error('[ReportesService] Error en getVentasPorRango:', error);
             throw new Error('Error al consultar las ventas del período.');
         }
     }

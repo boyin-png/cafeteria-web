@@ -48,7 +48,8 @@ export class MesasComponent implements OnInit {
             this.cargandoPedido = true;
             try {
                 this.pedidoActivo = await this.firestoreService.getById<Pedido>('pedidos', mesa.pedido_activo_id);
-            } catch {
+            } catch (error) {
+                console.error('[MesasComponent] Error cargando pedido activo:', error);
                 this.pedidoActivo = null;
             } finally {
                 this.cargandoPedido = false;

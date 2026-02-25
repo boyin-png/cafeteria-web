@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -20,6 +20,7 @@ import { MetodoPago, DetallesCliente } from '../../../core/models/venta-historia
 export class CajaComponent implements OnInit {
     private cajaService = inject(CajaService);
     private authService = inject(AuthService);
+    private ngZone = inject(NgZone);
 
     /* ── Estado principal ── */
     turnoActivo: TurnoCaja | null = null;
@@ -68,14 +69,17 @@ export class CajaComponent implements OnInit {
         if (!usuario) { this.cargandoTurno = false; return; }
 
         try {
-            this.turnoActivo = await this.cajaService.getTurnoActivo(usuario.id);
-            if (this.turnoActivo) {
-                this.pedidosParaCobrar$ = this.cajaService.getPedidosParaCobrar();
-            }
+            const turno = await this.cajaService.getTurnoActivo(usuario.id);
+            this.ngZone.run(() => {
+                this.turnoActivo = turno;
+                if (this.turnoActivo) {
+                    this.pedidosParaCobrar$ = this.cajaService.getPedidosParaCobrar();
+                }
+            });
         } catch (e: any) {
-            this.errorTurno = e.message;
+            this.ngZone.run(() => { this.errorTurno = e.message; });
         } finally {
-            this.cargandoTurno = false;
+            this.ngZone.run(() => { this.cargandoTurno = false; });
         }
     }
 
@@ -87,9 +91,9 @@ export class CajaComponent implements OnInit {
             await this.cajaService.abrirTurno(this.fondoInicial);
             await this.verificarTurno();
         } catch (e: any) {
-            this.errorTurno = e.message;
+            this.ngZone.run(() => { this.errorTurno = e.message; });
         } finally {
-            this.abriendoTurno = false;
+            this.ngZone.run(() => { this.abriendoTurno = false; });
         }
     }
 
@@ -137,12 +141,14 @@ export class CajaComponent implements OnInit {
                 metodoPago: this.metodoPago,
                 datosCliente
             });
-            this.cerrarModalCobro();
-            this.mostrarToast(`Venta registrada: $${resultado.totalPagado.toFixed(2)}`);
+            this.ngZone.run(() => {
+                this.cerrarModalCobro();
+                this.mostrarToast(`Venta registrada: $${resultado.totalPagado.toFixed(2)}`);
+            });
         } catch (e: any) {
-            this.errorCobro = e.message;
+            this.ngZone.run(() => { this.errorCobro = e.message; });
         } finally {
-            this.procesandoCobro = false;
+            this.ngZone.run(() => { this.procesandoCobro = false; });
         }
     }
 
@@ -163,18 +169,21 @@ export class CajaComponent implements OnInit {
         this.modalCierre = true;
 
         try {
-            this.historialTurno = await this.cajaService.getHistorialTurno(this.turnoActivo.id);
-            this.resumenCierre = {
-                totalEfectivo: this.historialTurno.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + v.total_pagado, 0),
-                totalTarjeta: this.historialTurno.filter(v => v.metodo_pago === 'tarjeta').reduce((s, v) => s + v.total_pagado, 0),
-                totalVentas: this.historialTurno.reduce((s, v) => s + v.total_pagado, 0),
-                numTransacciones: this.historialTurno.length
-            };
-            this.efectivoEnCaja = (this.turnoActivo.fondo_inicial || 0) + this.resumenCierre.totalEfectivo;
+            const historial = await this.cajaService.getHistorialTurno(this.turnoActivo.id);
+            this.ngZone.run(() => {
+                this.historialTurno = historial;
+                this.resumenCierre = {
+                    totalEfectivo: this.historialTurno.filter(v => v.metodo_pago === 'efectivo').reduce((s, v) => s + v.total_pagado, 0),
+                    totalTarjeta: this.historialTurno.filter(v => v.metodo_pago === 'tarjeta').reduce((s, v) => s + v.total_pagado, 0),
+                    totalVentas: this.historialTurno.reduce((s, v) => s + v.total_pagado, 0),
+                    numTransacciones: this.historialTurno.length
+                };
+                this.efectivoEnCaja = (this.turnoActivo?.fondo_inicial || 0) + this.resumenCierre.totalEfectivo;
+            });
         } catch (e: any) {
-            this.errorCierre = e.message;
+            this.ngZone.run(() => { this.errorCierre = e.message; });
         } finally {
-            this.cargandoCierre = false;
+            this.ngZone.run(() => { this.cargandoCierre = false; });
         }
     }
 
@@ -189,13 +198,15 @@ export class CajaComponent implements OnInit {
         this.errorCierre = '';
         try {
             await this.cajaService.cerrarTurno(this.turnoActivo.id);
-            this.modalCierre = false;
-            this.turnoActivo = null;
-            this.mostrarToast('Turno cerrado exitosamente.');
+            this.ngZone.run(() => {
+                this.modalCierre = false;
+                this.turnoActivo = null;
+                this.mostrarToast('Turno cerrado exitosamente.');
+            });
         } catch (e: any) {
-            this.errorCierre = e.message;
+            this.ngZone.run(() => { this.errorCierre = e.message; });
         } finally {
-            this.cerrandoTurno = false;
+            this.ngZone.run(() => { this.cerrandoTurno = false; });
         }
     }
 

@@ -28,7 +28,7 @@ export class AdminLayoutComponent {
 
     navItems: NavItem[] = [
         { label: 'Dashboard', icon: 'layout-dashboard', route: '/admin/dashboard', roles: ['admin', 'cajero'] },
-        { label: 'Mesas', icon: 'layout-grid', route: '/admin/mesas', roles: ['admin', 'cajero'] },
+        { label: 'Mesas', icon: 'layout-grid', route: '/admin/mesas', roles: ['admin', 'cajero', 'mesero'] },
         { label: 'Caja', icon: 'credit-card', route: '/admin/caja', roles: ['admin', 'cajero'] },
         { label: 'Menú', icon: 'utensils-crossed', route: '/admin/menu', roles: ['admin'] },
         { label: 'Inventario', icon: 'package', route: '/admin/inventario', roles: ['admin'] },

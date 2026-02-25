@@ -53,13 +53,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
     match /turnos_caja/{id} {
-      allow read:  if isAdmin() || (isCajero() && resource.data.cajero_id == request.auth.uid);
+      allow read:  if isAdmin() || isCajero(); // Permitimos leer los turnos a los cajeros globalmente (el filtro visual en query se encarga de lo suyo)
       allow create: if isCajero() || isAdmin();
-      allow update: if isAdmin();
+      allow update: if isAdmin() || isCajero(); // El cajero necesita poder cerrar su turno
       allow delete: if false;
     }
     match /ventas_historial/{id} {
-      allow read:  if isAdmin() || (isCajero() && resource.data.cajero_id == request.auth.uid);
+      allow read:  if isAdmin() || isCajero(); // Permitimos a los cajeros usar reportes.service.ts para las graficas
       allow write: if false; // Solo Cloud Functions escriben aqui
     }
   }

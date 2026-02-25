@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FirestoreService, where } from '../../../core/services/firestore.service';
 import { RealtimeService } from '../../../core/services/realtime.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Pedido } from '../../../core/models/pedido.model';
 import { TurnoCaja } from '../../../core/models/turno-caja.model';
 import { VentaHistorial } from '../../../core/models/venta-historial.model';
@@ -22,6 +23,7 @@ interface CobrarResponse {
 export class CajaService {
     private firestoreService = inject(FirestoreService);
     private realtimeService = inject(RealtimeService);
+    private authService = inject(AuthService);
 
     /**
      * Escucha en tiempo real los pedidos con estado 'entregado' listos para cobrar.
@@ -45,8 +47,9 @@ export class CajaService {
                 where('estado', '==', 'abierto')
             );
             return turnos.length > 0 ? turnos[0] : null;
-        } catch {
-            throw new Error('Error al consultar el turno activo. Verifica tu conexión.');
+        } catch (error) {
+            console.error('[CajaService] Error en getTurnoActivo:', error);
+            throw new Error('Error al consultar el turno activo. Verifica tu conexión e indexación.');
         }
     }
 
@@ -56,12 +59,16 @@ export class CajaService {
      */
     async abrirTurno(fondoInicial: number): Promise<string> {
         try {
+            const user = this.authService.currentUser();
+            if (!user) throw new Error("No hay usuario autenticado.");
             return await this.firestoreService.add('turnos_caja', {
+                cajero_id: user.id,
                 fondo_inicial: fondoInicial,
                 estado: 'abierto',
                 fecha_apertura: new Date().toISOString()
             } as any);
         } catch (error: any) {
+            console.error('[CajaService] Error en abrirTurno:', error);
             throw new Error(this.mapearError(error, 'No se pudo abrir el turno de caja.'));
         }
     }

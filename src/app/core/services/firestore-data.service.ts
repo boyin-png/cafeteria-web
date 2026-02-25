@@ -1,5 +1,5 @@
 import { inject } from '@angular/core';
-import { Firestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, onSnapshot, QueryConstraint } from '@angular/fire/firestore';
+import { Firestore, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, getDoc, getDocs, query, where, orderBy, limit, onSnapshot, QueryConstraint } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { DataAbstract, QueryFiltro } from '../abstractions/data.abstract';
 
@@ -53,8 +53,10 @@ export class FirestoreDataService implements DataAbstract {
         });
     }
 
-    private filtrosAConstraints(filtros: QueryFiltro[]): QueryConstraint[] {
+    private filtrosAConstraints(filtros: any[]): QueryConstraint[] {
         return filtros.map(f => {
+            if (f.tipo === 'orderBy') return orderBy(f.campo, f.direccion || 'asc');
+            if (f.tipo === 'limit') return limit(f.limite);
             if (f.operador === "in") return where(f.campo, "in", f.valor);
             return where(f.campo, f.operador as any, f.valor);
         });
