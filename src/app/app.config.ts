@@ -9,9 +9,9 @@ import { FirebaseAuthService } from './core/services/firebase-auth.service';
 import { FirestoreDataService } from './core/services/firestore-data.service';
 import { environment } from '../environments/environment';
 
-import { LucideAngularModule, AlertTriangle, Award, Banknote, BarChart2, Bell, CheckCircle, ChevronRight, Circle, ClipboardList, Clock, Coffee, CreditCard, Download, Eye, EyeOff, Filter, Flame, Folder, Hash, LayoutDashboard, LayoutGrid, Lock, LogOut, Mail, Menu, Package, Pencil, Plus, Printer, RefreshCw, Search, Settings, ShoppingBag, Sparkles, Tag, Trash2, TrendingUp, Users, Utensils, UtensilsCrossed, Wallet, Wrench, X } from "lucide-angular";
+import { LucideAngularModule, AlertTriangle, Award, Banknote, BarChart2, Bell, CheckCircle, ChevronLeft, ChevronRight, Circle, ClipboardList, Clock, Coffee, CreditCard, Download, Eye, EyeOff, Filter, Flame, Folder, Hash, LayoutDashboard, LayoutGrid, Lock, LogOut, Mail, Menu, Minus, Package, Pencil, Plus, PlusCircle, Printer, RefreshCw, Search, Settings, ShoppingBag, Smartphone, Sparkles, Tag, Trash2, TrendingUp, Users, Utensils, UtensilsCrossed, Wallet, Wrench, X } from "lucide-angular";
 
-const ICONS = { AlertTriangle, Award, Banknote, BarChart2, Bell, CheckCircle, ChevronRight, Circle, ClipboardList, Clock, Coffee, CreditCard, Download, Eye, EyeOff, Filter, Flame, Folder, Hash, LayoutDashboard, LayoutGrid, Lock, LogOut, Mail, Menu, Package, Pencil, Plus, Printer, RefreshCw, Search, Settings, ShoppingBag, Sparkles, Tag, Trash2, TrendingUp, Users, Utensils, UtensilsCrossed, Wallet, Wrench, X };
+const ICONS = { AlertTriangle, Award, Banknote, BarChart2, Bell, CheckCircle, ChevronLeft, ChevronRight, Circle, ClipboardList, Clock, Coffee, CreditCard, Download, Eye, EyeOff, Filter, Flame, Folder, Hash, LayoutDashboard, LayoutGrid, Lock, LogOut, Mail, Menu, Minus, Package, Pencil, Plus, PlusCircle, Printer, RefreshCw, Search, Settings, ShoppingBag, Smartphone, Sparkles, Tag, Trash2, TrendingUp, Users, Utensils, UtensilsCrossed, Wallet, Wrench, X };
 
 export const appConfig: ApplicationConfig = {
   providers: [

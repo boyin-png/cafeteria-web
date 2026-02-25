@@ -21,7 +21,8 @@
 
         <div class="error-msg" *ngIf="errorTurno">{{ errorTurno }}</div>
 
-        <button class="btn-primary full" (click)="abrirTurno()" [disabled]="abriendoTurno || fondoInicial < 0">
+        <button type="button" class="btn-primary full" (click)="abrirTurno()"
+            [disabled]="abriendoTurno || fondoInicial < 0">
             <span *ngIf="!abriendoTurno">Abrir Turno</span>
             <span *ngIf="abriendoTurno" class="spinner-inline"></span>
         </button>
@@ -41,7 +42,13 @@
                 <span>💵 Fondo: ${{ turnoActivo.fondo_inicial.toFixed(2) }}</span>
             </div>
         </div>
-        <button class="btn-cerrar-turno" (click)="abrirModalCierre()">Cerrar Turno</button>
+        <div style="display: flex; gap: 1rem;">
+            <button type="button" class="btn-accion" style="background:var(--color-primary); color:white"
+                (click)="abrirModalVentaRapida()">
+                <lucide-icon name="plus-circle" [size]="18"></lucide-icon> Venta Rápida
+            </button>
+            <button type="button" class="btn-cerrar-turno" (click)="abrirModalCierre()">Cerrar Turno</button>
+        </div>
     </div>
 
     <!-- Lista de pedidos para cobrar -->
@@ -58,7 +65,8 @@
         <div class="pedidos-lista">
             <div *ngFor="let pedido of pedidos" class="pedido-card">
                 <div class="pedido-info">
-                    <div class="pedido-mesa">Mesa {{ pedido.mesa_id }}</div>
+                    <div class="pedido-mesa">{{ pedido.mesa_id === 'VENTA_DIRECTA' || !pedido.mesa_id ? 'Venta Directa'
+                        : ('Mesa ' + pedido.mesa_id) }}</div>
                     <div class="pedido-items-resumen">
                         <span *ngFor="let item of pedido.items; let last = last">
                             {{ item.cantidad }}× {{ item.nombre }}{{ last ? '' : ', ' }}
@@ -124,6 +132,10 @@
                 <input type="radio" name="metodoPago" value="tarjeta" [(ngModel)]="metodoPago" />
                 <span class="radio-icon"><lucide-icon name="credit-card" [size]="18"></lucide-icon></span> Tarjeta
             </label>
+            <label class="radio-card" [class.selected]="metodoPago === 'transferencia'">
+                <input type="radio" name="metodoPago" value="transferencia" [(ngModel)]="metodoPago" />
+                <span class="radio-icon"><lucide-icon name="smartphone" [size]="18"></lucide-icon></span> Transferencia
+            </label>
         </div>
 
         <!-- Efectivo: monto recibido y cambio -->
@@ -176,6 +188,143 @@
     </div>
 </div>
 
+<!-- Modal Venta Rápida (TPV) -->
+<div class="modal-overlay" *ngIf="modalVentaRapida" (click)="cerrarModalVentaRapida()"></div>
+<div class="modal tpv-modal" *ngIf="modalVentaRapida">
+    <div class="modal-header">
+        <h3>Venta Directa</h3>
+        <button class="modal-close" (click)="cerrarModalVentaRapida()">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding: 0; display: contents;">
+        <!-- PASO 1: PUNTO DE VENTA -->
+        <div class="tpv-layout" *ngIf="stepVentaRapida === 'PuntoDeVenta'">
+            <!-- Categorías -->
+            <aside class="tpv-sidebar">
+                <button *ngFor="let cat of categorias" class="cat-btn" [class.active]="categoriaActiva === cat.id"
+                    (click)="filtrarPorCategoria(cat.id)">
+                    {{ cat.nombre }}
+                </button>
+            </aside>
+
+            <!-- Productos -->
+            <section class="tpv-productos">
+                <div class="productos-grid">
+                    <div *ngFor="let prod of productosVisibles" class="prod-card" (click)="agregarAlCarrito(prod)">
+                        <span class="prod-name">{{ prod.nombre }}</span>
+                        <span class="prod-price">${{ prod.precio.toFixed(2) }}</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Carrito (Ticket) -->
+            <aside class="tpv-cart">
+                <div class="cart-header">
+                    <h4>Ticket en curso</h4>
+                </div>
+                <div class="cart-items">
+                    <div *ngFor="let item of carritoVentaActiva; let i = index" class="cart-item">
+
+                        <div class="item-qty-controls">
+                            <button type="button" class="btn-qty" (click)="restarCantidad(i)"><lucide-icon name="minus"
+                                    [size]="14"></lucide-icon></button>
+                            <div class="item-qty">{{ item.cantidad }}</div>
+                            <button type="button" class="btn-qty" (click)="sumarCantidad(i)"><lucide-icon name="plus"
+                                    [size]="14"></lucide-icon></button>
+                        </div>
+
+                        <div class="item-desc">
+                            <span class="item-name">{{ item.nombre }}</span>
+                            <input type="text" class="item-specs-input" [(ngModel)]="item.especificaciones"
+                                placeholder="Notas / Espec." />
+                        </div>
+                        <div class="item-price">${{ (item.precio_snapshot * item.cantidad).toFixed(2) }}</div>
+                        <button type="button" class="btn-remove" (click)="quitarDelCarrito(i)">
+                            <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                        </button>
+                    </div>
+                    <div class="empty-cart" *ngIf="carritoVentaActiva.length === 0">
+                        Selecciona productos
+                    </div>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <span>Total:</span>
+                        <span>${{ totalCarritoRapida.toFixed(2) }}</span>
+                    </div>
+                    <div class="error-msg" *ngIf="errorCobro">{{ errorCobro }}</div>
+                    <button type="button" class="btn-primary btn-block" style="margin-top: 1rem;"
+                        [disabled]="carritoVentaActiva.length === 0" (click)="avanzarACobroRapido()">
+                        Cobrar ${{ totalCarritoRapida.toFixed(2) }}
+                    </button>
+                </div>
+            </aside>
+        </div>
+
+        <!-- PASO 2: PAGO Y FACTURACIÓN -->
+        <div class="tpv-cobro" *ngIf="stepVentaRapida === 'Cobro'">
+            <div class="monto-gigante" style="margin-bottom: 2rem; text-align: center;">
+                <p style="color:var(--text-secondary); margin-bottom:0.5rem;">Costo de Venta</p>
+                <div style="font-size: 3rem; font-weight:700; color:var(--text-primary);">
+                    ${{ montoVentaRapida.toFixed(2) }}
+                </div>
+            </div>
+
+            <!-- Nombre Opcional del Cliente -->
+            <div class="form-field" style="margin-bottom: 1.5rem;">
+                <label>Nombre del Cliente (Opcional)</label>
+                <input type="text" [(ngModel)]="nombreClienteOpcional" placeholder="Ej. Juan Pérez" />
+            </div>
+
+            <!-- Método de pago -->
+            <div class="metodo-pago">
+                <label class="radio-card" [class.selected]="metodoPago === 'efectivo'">
+                    <input type="radio" name="metodoPago" value="efectivo" [(ngModel)]="metodoPago" />
+                    <span class="radio-icon"><lucide-icon name="banknote" [size]="18"></lucide-icon></span> Efectivo
+                </label>
+                <label class="radio-card" [class.selected]="metodoPago === 'tarjeta'">
+                    <input type="radio" name="metodoPago" value="tarjeta" [(ngModel)]="metodoPago" />
+                    <span class="radio-icon"><lucide-icon name="credit-card" [size]="18"></lucide-icon></span> Tarjeta
+                </label>
+                <label class="radio-card" [class.selected]="metodoPago === 'transferencia'">
+                    <input type="radio" name="metodoPago" value="transferencia" [(ngModel)]="metodoPago" />
+                    <span class="radio-icon"><lucide-icon name="smartphone" [size]="18"></lucide-icon></span>
+                    Transferencia
+                </label>
+            </div>
+
+            <!-- Efectivo: monto recibido y cambio -->
+            <div *ngIf="metodoPago === 'efectivo'" class="efectivo-section">
+                <div class="form-field">
+                    <label>Monto recibido</label>
+                    <input type="number" [(ngModel)]="montoRecibido" min="0" step="0.01" />
+                </div>
+                <div class="cambio-display"
+                    [class.insuficiente]="montoRecibido > 0 && montoRecibido < montoVentaRapida">
+                    <span class="cambio-label">{{ (montoRecibido > 0 && montoRecibido < montoVentaRapida)
+                            ? 'Monto insuficiente' : 'Cambio' }}</span>
+                            <span class="cambio-valor"
+                                *ngIf="!(montoRecibido > 0 && montoRecibido < montoVentaRapida)">${{
+                                Math.max(0, montoRecibido - montoVentaRapida).toFixed(2) }}</span>
+                </div>
+            </div>
+
+            <div class="error-msg" *ngIf="errorCobro">{{ errorCobro }}</div>
+
+            <div class="modal-footer" style="justify-content: space-between; margin-top: 2rem;">
+                <button type="button" class="btn-secondary" (click)="regresarAPuntoDeVenta()">
+                    <lucide-icon name="chevron-left" [size]="16" style="margin-right: 0.5rem;"></lucide-icon> Volver a
+                    Ticket
+                </button>
+                <button type="button" class="btn-primary" (click)="confirmarVentaRapida()"
+                    [disabled]="procesandoCobro || montoVentaRapida <= 0 || (metodoPago === 'efectivo' && montoRecibido < montoVentaRapida)">
+                    <span *ngIf="!procesandoCobro">Finalizar Venta</span>
+                    <span *ngIf="procesandoCobro" class="spinner-inline"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- ════════════════════════════════════
      MODAL CIERRE DE TURNO
      ════════════════════════════════════ -->
@@ -199,6 +348,10 @@
                 <div class="resumen-item">
                     <span class="resumen-label">Tarjeta</span>
                     <span class="resumen-value">${{ resumenCierre.totalTarjeta.toFixed(2) }}</span>
+                </div>
+                <div class="resumen-item">
+                    <span class="resumen-label">Transferencia</span>
+                    <span class="resumen-value">${{ resumenCierre.totalTransferencia.toFixed(2) }}</span>
                 </div>
                 <div class="resumen-item highlight">
                     <span class="resumen-label">Total Ventas</span>

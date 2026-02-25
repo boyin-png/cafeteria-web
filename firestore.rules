@@ -60,7 +60,8 @@ service cloud.firestore {
     }
     match /ventas_historial/{id} {
       allow read:  if isAdmin() || isCajero(); // Permitimos a los cajeros usar reportes.service.ts para las graficas
-      allow write: if false; // Solo Cloud Functions escriben aqui
+      allow create: if isAdmin() || isCajero(); // Permitido para registrar tickets desde la Caja
+      allow update, delete: if false;
     }
   }
 }

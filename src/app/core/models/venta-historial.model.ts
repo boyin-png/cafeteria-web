@@ -1,6 +1,6 @@
 import { DescuentoAplicado, ItemPedido } from './pedido.model';
 
-export type MetodoPago = 'efectivo' | 'tarjeta';
+export type MetodoPago = 'efectivo' | 'tarjeta' | 'transferencia';
 
 export interface DetallesCliente {
     nombre: string;

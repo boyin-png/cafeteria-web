@@ -3,6 +3,7 @@ export type EstadoTurno = 'abierto' | 'cerrado';
 export interface ResumenVentas {
     total_efectivo: number;
     total_tarjeta: number;
+    total_transferencia: number;
     total_ventas: number;
     num_transacciones: number;
 }

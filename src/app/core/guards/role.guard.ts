@@ -4,18 +4,16 @@ import { AUTH_SERVICE } from '../tokens/service-tokens';
 import { RolStaff } from '../models/usuario-staff.model';
 
 export const roleGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
-    const authService = inject(AUTH_SERVICE);
+    const auth = inject(AUTH_SERVICE);
     const router = inject(Router);
+    const roles: string[] = route.data['roles'] ?? [];
 
-    const roles = route.data['roles'] as RolStaff[] | undefined;
+    if (roles.length === 0) return true; // sin restriccion
+    if (auth.hasRole(...roles as RolStaff[])) return true;
 
-    if (!roles || roles.length === 0) {
-        return true;
-    }
-
-    if (authService.hasRole(...roles)) {
-        return true;
-    }
-
-    return router.createUrlTree(['/no-autorizado']);
+    // Redirigir segun rol
+    const rolActual = auth.rol;
+    if (rolActual === 'cocina') return router.createUrlTree(['/kds']);
+    if (rolActual === 'mesero') return router.createUrlTree(['/admin/mesas']);
+    return router.createUrlTree(['/admin/dashboard']);
 };

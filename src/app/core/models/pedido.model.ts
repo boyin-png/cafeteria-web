@@ -31,7 +31,9 @@ export interface Pedido {
     estado: EstadoPedido;
     items: ItemPedido[];
     descuento_aplicado: DescuentoAplicado | null;
+    descuento?: number;
     subtotal: number;
+    impuestos?: number;
     total: number;
     timestamp: string;
 }
