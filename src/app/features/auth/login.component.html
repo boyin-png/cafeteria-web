@@ -15,20 +15,21 @@
     <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
 
       <div class="input-group">
-        <label class="input-label">
+        <label class="input-label" for="loginEmail">
           <lucide-icon name="mail" [size]="14"></lucide-icon>
           Correo electronico
         </label>
-        <input class="input" type="email" formControlName="email" placeholder="tu@correo.com" autocomplete="email">
+        <input id="loginEmail" class="input" type="email" formControlName="email" placeholder="tu@correo.com"
+          autocomplete="email">
       </div>
 
       <div class="input-group">
-        <label class="input-label">
+        <label class="input-label" for="loginPassword">
           <lucide-icon name="lock" [size]="14"></lucide-icon>
           Contrasena
         </label>
         <div class="input-wrapper">
-          <input class="input" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+          <input id="loginPassword" class="input" [type]="showPassword ? 'text' : 'password'" formControlName="password"
             placeholder="Ingresa tu contrasena" autocomplete="current-password">
           <button type="button" class="toggle-pw" (click)="showPassword = !showPassword">
             <lucide-icon [name]="showPassword ? 'eye-off' : 'eye'" [size]="18"></lucide-icon>

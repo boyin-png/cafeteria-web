@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,6 +17,7 @@ export class LoginComponent {
     private fb = inject(FormBuilder);
     private authService = inject(AuthService);
     private router = inject(Router);
+    private ngZone = inject(NgZone);
 
     loginForm: FormGroup = this.fb.group({
         email: ['', [Validators.required, Validators.email]],
@@ -36,15 +37,29 @@ export class LoginComponent {
         const { email, password } = this.loginForm.value;
 
         try {
+            console.log('[LoginComponent] Iniciando login para:', email);
             await this.authService.login(email, password);
-            const rol = this.authService.rol;
-            if (rol) {
-                this.redirigirPorRol(rol);
-            }
+            console.log('[LoginComponent] Login completado en servicio. Redirigiendo...');
+            this.ngZone.run(() => {
+                const rol = this.authService.rol;
+                console.log('[LoginComponent] Rol obtenido:', rol);
+                if (rol) {
+                    this.redirigirPorRol(rol);
+                } else {
+                    console.log('[LoginComponent] Error: No hay rol asignado.');
+                    this.errorMessage = 'No tienes un rol asignado.';
+                }
+            });
         } catch (error: any) {
-            this.errorMessage = this.mapearError(error.message);
+            console.error('[LoginComponent] Error capturado:', error);
+            this.ngZone.run(() => {
+                this.errorMessage = this.mapearError(error.message);
+            });
         } finally {
-            this.isLoading = false;
+            console.log('[LoginComponent] Bloque finally alcanzado.');
+            this.ngZone.run(() => {
+                this.isLoading = false;
+            });
         }
     }
 

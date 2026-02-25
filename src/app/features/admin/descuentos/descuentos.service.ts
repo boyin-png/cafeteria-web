@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { FirestoreService } from '../../../core/services/firestore.service';
+import { FirestoreService, orderBy } from '../../../core/services/firestore.service';
 import { Descuento } from '../../../core/models/descuento.model';
-import { orderBy } from '@angular/fire/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class DescuentosService {

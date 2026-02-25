@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { RealtimeService } from '../../core/services/realtime.service';
-import { FirestoreService } from '../../core/services/firestore.service';
+import { FirestoreService, where } from '../../core/services/firestore.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Pedido } from '../../core/models/pedido.model';
-import { where } from '@angular/fire/firestore';
 
 import { LucideAngularModule } from 'lucide-angular';
 

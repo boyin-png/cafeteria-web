@@ -1,85 +1,24 @@
 {
-    "indexes": [
+  "indexes": [
+    {
+      "collectionGroup": "categorias",
+      "queryScope": "COLLECTION",
+      "fields": [
         {
-            "collectionGroup": "pedidos",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "estado",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "timestamp",
-                    "order": "ASCENDING"
-                }
-            ]
+          "fieldPath": "activa",
+          "order": "ASCENDING"
         },
         {
-            "collectionGroup": "pedidos",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "mesa_id",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "estado",
-                    "order": "ASCENDING"
-                }
-            ]
+          "fieldPath": "orden_visual",
+          "order": "ASCENDING"
         },
         {
-            "collectionGroup": "ventas_historial",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "turno_id",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "fecha_pago",
-                    "order": "DESCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "ventas_historial",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "cajero_id",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "fecha_pago",
-                    "order": "DESCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "ventas_historial",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "fecha_pago",
-                    "order": "ASCENDING"
-                }
-            ]
-        },
-        {
-            "collectionGroup": "turnos_caja",
-            "queryScope": "COLLECTION",
-            "fields": [
-                {
-                    "fieldPath": "cajero_id",
-                    "order": "ASCENDING"
-                },
-                {
-                    "fieldPath": "estado",
-                    "order": "ASCENDING"
-                }
-            ]
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
         }
-    ],
-    "fieldOverrides": []
+      ],
+      "density": "SPARSE_ALL"
+    }
+  ],
+  "fieldOverrides": []
 }

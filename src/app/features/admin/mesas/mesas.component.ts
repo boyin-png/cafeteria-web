@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { LucideAngularModule } from 'lucide-angular';
 import { RealtimeService } from '../../../core/services/realtime.service';
-import { FirestoreService } from '../../../core/services/firestore.service';
+import { FirestoreService, orderBy } from '../../../core/services/firestore.service';
 import { Mesa, EstadoMesa } from '../../../core/models/mesa.model';
 import { Pedido } from '../../../core/models/pedido.model';
-import { orderBy } from '@angular/fire/firestore';
 
 @Component({
     selector: 'app-mesas',
